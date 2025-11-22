@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Galaxy of Filters</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar">
+        <h1 id="sidebar-heading"></h1>
+        <div id="sidebar-chat"></div>
+        <ul id="sidebar-notes"></ul>
+        <div id="sidebar-diagram-hint"></div>
+
+        <div id="sidebar-legend"></div>
+
+        <div id="controls">
+          <button id="btn-prev">Previous</button>
+          <button id="btn-next">Next</button>
+        </div>
+      </aside>
+
+      <main id="viz">
+        <canvas id="galaxy-canvas"></canvas>
+        <svg id="scatter-svg" style="display: none"></svg>
+        <!-- small multiples container can go here later -->
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

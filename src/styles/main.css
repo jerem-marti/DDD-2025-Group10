@@ -1,0 +1,340 @@
+/* ─────────────────────────────────────────
+   Global layout & typography
+────────────────────────────────────────── */
+
+:root {
+  --bg-body: #050816;
+  --bg-sidebar: #0e1020;
+  --bg-panel: #111827;
+  --bg-viz: #020617;
+
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --accent: #22d3ee;  /* cyan */
+  --accent-soft: rgba(34, 211, 238, 0.15);
+
+  --border-subtle: #1f2933;
+
+  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
+  color: var(--text-main);
+  font-family: var(--font-body);
+}
+
+/* Main app: sidebar + viz side by side */
+#app {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  height: 100vh;
+}
+
+/* ─────────────────────────────────────────
+   Sidebar
+────────────────────────────────────────── */
+
+#sidebar {
+  background: linear-gradient(180deg, #020617 0, #020617 40%, #020617 100%);
+  border-right: 1px solid var(--border-subtle);
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+#sidebar-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Chat area */
+#sidebar-chat {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Chat messages */
+.msg {
+  max-width: 95%;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.msg-user {
+  align-self: flex-end;
+  background: rgba(15, 118, 110, 0.35);
+  border: 1px solid rgba(45, 212, 191, 0.5);
+}
+
+.msg-guide {
+  align-self: flex-start;
+  background: rgba(30, 64, 175, 0.35);
+  border: 1px solid rgba(96, 165, 250, 0.5);
+}
+
+/* Notes list */
+#sidebar-notes {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+#sidebar-notes li {
+  margin-bottom: 0.15rem;
+}
+
+/* Diagram hint (placeholder text or future inline diagrams) */
+#sidebar-diagram-hint {
+  margin-top: 0.2rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+}
+
+/* Controls */
+#controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+#controls button {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+    transform 0.08s ease;
+}
+
+#controls button:hover {
+  background: rgba(30, 64, 175, 0.9);
+  border-color: var(--accent);
+}
+
+#controls button:active {
+  transform: scale(0.97);
+}
+
+/* ─────────────────────────────────────────
+   Sidebar legend
+────────────────────────────────────────── */
+
+#sidebar-legend {
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(31, 41, 55, 0.9);
+  font-size: 0.78rem;
+}
+
+#sidebar-legend-title {
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+  color: #e5e7eb;
+}
+
+#sidebar-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  flex-shrink: 0;
+}
+
+/* Color swatches just fill with the given background */
+.legend-swatch-color {
+  /* background-color set inline via JS */
+}
+
+/* Example hatch textures for legend (for gravity) */
+.legend-swatch-hatch-sparse {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.4) 0,
+    rgba(148, 163, 184, 0.4) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+}
+
+.legend-swatch-hatch-medium {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.6) 0,
+    rgba(148, 163, 184, 0.6) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+.legend-swatch-hatch-dense {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(148, 163, 184, 0.8) 0,
+    rgba(148, 163, 184, 0.8) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+/* ─────────────────────────────────────────
+   Viz area
+────────────────────────────────────────── */
+
+#viz {
+  position: relative;
+  background: radial-gradient(circle at top left, #0b1120 0, #020617 55%, #000 100%);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Canvas galaxy view */
+#galaxy-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Scatter view (on top of or instead of canvas) */
+#scatter-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Smoother look for circles with better anti-aliasing */
+#scatter-svg .points circle {
+  shape-rendering: geometricPrecision;
+}
+
+/* Axis styling */
+#scatter-svg .axis-label {
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+#scatter-svg .tick line {
+  stroke: rgba(148, 163, 184, 0.15);
+}
+
+#scatter-svg .tick text {
+  fill: var(--text-muted);
+  font-size: 11px;
+}
+
+#scatter-svg .domain {
+  stroke: rgba(148, 163, 184, 0.3);
+}
+
+/* ─────────────────────────────────────────
+   Background layers: bands & windows
+────────────────────────────────────────── */
+
+/* 1. Rocky window – vertical band on radius axis */
+.bg-rocky-window {
+  /* Very subtle teal band */
+  fill: rgba(34, 211, 238, 0.12);
+  stroke: rgba(34, 211, 238, 0.5);
+  stroke-width: 0.5;
+  stroke-dasharray: 4 3;
+  pointer-events: none;
+}
+
+/* 2. Habitable zone bands – optimistic and conservative */
+.bg-hz-optimistic {
+  /* light green wash over optimistic range */
+  fill: rgba(74, 222, 128, 0.05);
+  stroke: none;
+  pointer-events: none;
+}
+
+.bg-hz-conservative {
+  /* slightly more saturated green inside optimistic band */
+  fill: rgba(74, 222, 128, 0.18);
+  stroke: rgba(74, 222, 128, 0.5);
+  stroke-width: 0.5;
+  pointer-events: none;
+}
+
+/* 3. Gravity comfortable band – horizontal band on g-axis */
+.bg-gravity-band {
+  fill: rgba(148, 163, 184, 0.15);
+  stroke: rgba(148, 163, 184, 0.6);
+  stroke-width: 0.4;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+/* 4. Gravity iso-lines – curves of constant g */
+.bg-gravity-iso {
+  stroke: rgba(148, 163, 184, 0.7);
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* You can emphasize 1 g line specifically if you give it a class
+   or data attribute later, but for now they all share the same style. */
+
+/* ─────────────────────────────────────────
+   Utility
+────────────────────────────────────────── */
+
+.show-small-multiples #viz {
+  /* Example: dim the main viz when cards appear */
+  filter: blur(1px) brightness(0.8);
+}
