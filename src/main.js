@@ -5,6 +5,7 @@ import { initGalaxyView } from "./views/galaxyView.js";
 import { initScatterView } from "./views/scatterView.js";
 import { initSidebar } from "./ui/sidebar.js";
 import { initControls } from "./ui/controls.js";
+import { initTooltip } from "./ui/tooltip.js";
 
 async function init() {
   // Load datasets
@@ -14,6 +15,7 @@ async function init() {
   // Grab DOM elements
   const galaxyCanvas = document.getElementById("galaxy-canvas");
   const scatterSvg = document.getElementById("scatter-svg");
+  const tooltipEl = document.getElementById("tooltip");
 
   const sidebarHeading = document.getElementById("sidebar-heading");
   const sidebarChat = document.getElementById("sidebar-chat");
@@ -25,8 +27,9 @@ async function init() {
   const nextBtn = document.getElementById("btn-next");
 
   // Init components
-  const galaxyView = initGalaxyView(galaxyCanvas);
-  const scatterView = initScatterView(scatterSvg);
+  const tooltip = initTooltip(tooltipEl);
+  const galaxyView = initGalaxyView(galaxyCanvas, tooltip);
+  const scatterView = initScatterView(scatterSvg, tooltip);
   const sidebar = initSidebar({
     headingEl: sidebarHeading,
     chatEl: sidebarChat,

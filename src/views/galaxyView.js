@@ -1,6 +1,8 @@
 // src/views/galaxyView.js
 
-export function initGalaxyView(canvas) {
+import { formatSystemTooltip, formatPlanetTooltip } from '../ui/tooltip.js';
+
+export function initGalaxyView(canvas, tooltip = null) {
   if (!canvas) {
     throw new Error("GalaxyView: canvas element is required");
   }
@@ -10,6 +12,9 @@ export function initGalaxyView(canvas) {
   let lastData = [];
   let lastView = null;
   let animationFrameId = null;
+  let hoveredSystem = null;
+  let hoveredPlanet = null;
+  let lastPlanetPositions = [];
 
   function resize() {
     const dpr = window.devicePixelRatio || 1;
@@ -33,6 +38,106 @@ export function initGalaxyView(canvas) {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(resize, 150);
   });
+
+  // Mouse tracking for tooltips
+  if (tooltip) {
+    canvas.addEventListener("mousemove", (event) => {
+      if (!lastData || !lastView || lastData.length === 0) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
+
+      // First check if hovering over a planet (Step 6 only)
+      let nearestPlanet = null;
+      let minPlanetDist = 10; // smaller threshold for planets
+
+      if (lastView.sceneId === "S3_GALAXY_CANDIDATES") {
+        lastPlanetPositions.forEach((planetPos) => {
+          const dist = Math.sqrt((planetPos.x - mouseX) ** 2 + (planetPos.y - mouseY) ** 2);
+          if (dist < minPlanetDist) {
+            minPlanetDist = dist;
+            nearestPlanet = planetPos;
+          }
+        });
+      }
+
+      // If hovering planet, show planet tooltip
+      if (nearestPlanet) {
+        if (hoveredPlanet !== nearestPlanet.planet) {
+          hoveredPlanet = nearestPlanet.planet;
+          hoveredSystem = null;
+          const content = formatPlanetTooltip(nearestPlanet.planet);
+          tooltip.show(content, event.clientX, event.clientY);
+          canvas.style.cursor = "pointer";
+        } else {
+          tooltip.show(formatPlanetTooltip(nearestPlanet.planet), event.clientX, event.clientY);
+        }
+        return;
+      }
+
+      // Reset planet hover if not over planet
+      if (hoveredPlanet !== null) {
+        hoveredPlanet = null;
+        // If we were showing a planet tooltip, hide it
+        if (!hoveredSystem) {
+          tooltip.hide();
+          canvas.style.cursor = "default";
+        }
+      }
+
+      // Then check for systems
+      const threshold = 15; // pixels
+      let nearest = null;
+      let minDist = threshold;
+
+      const { x, y, encodings = {} } = lastView;
+      const width = rect.width || 600;
+      const height = rect.height || 400;
+      const cx = width / 2;
+      const cy = height / 2;
+      const scaleFactor = calculateScaleFactor(lastData, x, y, width, height);
+
+      lastData.forEach((d) => {
+        const px = x(d);
+        const py = y(d);
+        const screenX = cx + px * scaleFactor;
+        const screenY = cy + py * scaleFactor;
+
+        const dist = Math.sqrt((screenX - mouseX) ** 2 + (screenY - mouseY) ** 2);
+        if (dist < minDist) {
+          minDist = dist;
+          nearest = d;
+        }
+      });
+
+      // In S3_GALAXY_CANDIDATES, only allow hover for systems with candidates
+      const canHover = !nearest ? false : 
+        (lastView.sceneId === "S3_GALAXY_CANDIDATES" ? nearest.hasCandidate : true);
+
+      if ((canHover ? nearest : null) !== hoveredSystem) {
+        hoveredSystem = canHover ? nearest : null;
+        if (hoveredSystem) {
+          const content = formatSystemTooltip(hoveredSystem);
+          tooltip.show(content, event.clientX, event.clientY);
+          canvas.style.cursor = "pointer";
+        } else {
+          tooltip.hide();
+          canvas.style.cursor = "default";
+        }
+      } else if (hoveredSystem) {
+        // Update tooltip position
+        tooltip.show(formatSystemTooltip(hoveredSystem), event.clientX, event.clientY);
+      }
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      hoveredSystem = null;
+      hoveredPlanet = null;
+      tooltip.hide();
+      canvas.style.cursor = "default";
+    });
+  }
 
   /**
    * Calculate optimal scale factor based on data distribution
@@ -157,10 +262,13 @@ export function initGalaxyView(canvas) {
 
   /**
    * Draw orbital rings and candidate planets around a star
+   * Returns array of planet positions for hover detection
    */
   function drawOrbitsAndPlanets(starX, starY, system, starRadius, starColor) {
     const planets = system.candidatePlanets || [];
-    if (planets.length === 0) return;
+    if (planets.length === 0) return [];
+
+    const planetPositions = [];
 
     ctx.globalAlpha = 0.3;
     ctx.strokeStyle = starColor;
@@ -208,9 +316,19 @@ export function initGalaxyView(canvas) {
         ctx.arc(planetX, planetY, planetSize * 2, 0, Math.PI * 2);
         ctx.fill();
       }
+
+      // Store planet position for hover detection
+      planetPositions.push({
+        x: planetX,
+        y: planetY,
+        radius: planetSize,
+        planet: planet,
+        system: system
+      });
     });
 
     ctx.globalAlpha = 1;
+    return planetPositions;
   }
 
   /**
@@ -323,11 +441,38 @@ export function initGalaxyView(canvas) {
 
       // Draw candidate planets orbiting around stars (only in Scene 3)
       if (sceneId === "S3_GALAXY_CANDIDATES" && d.hasCandidate && d.candidatePlanets && alpha > 0.7) {
-        drawOrbitsAndPlanets(screenX, screenY, d, r, col);
+        const positions = drawOrbitsAndPlanets(screenX, screenY, d, r, col);
+        lastPlanetPositions.push(...positions);
       }
 
-      // Apply glow to highlighted/important points
-      const shouldGlow = alpha > 0.7;
+      // Apply glow to highlighted/important points or hovered system
+      const isHovered = hoveredSystem === d;
+      const shouldGlow = alpha > 0.7 || isHovered;
+      
+      // Enhanced glow for hovered system - very visible
+      if (isHovered) {
+        // Draw multiple layers for intense glow
+        ctx.globalAlpha = 0.6;
+        const hoverGradient1 = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, r * 8);
+        hoverGradient1.addColorStop(0, "#22d3ee");
+        hoverGradient1.addColorStop(0.2, "#22d3eecc");
+        hoverGradient1.addColorStop(0.5, "#22d3ee66");
+        hoverGradient1.addColorStop(1, "#22d3ee00");
+        ctx.fillStyle = hoverGradient1;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, r * 8, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add bright ring around the point
+        ctx.globalAlpha = 0.9;
+        ctx.strokeStyle = "#22d3ee";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, r * 1.5, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        ctx.globalAlpha = 1;
+      }
       
       drawPoint(cx, cy, screenX, screenY, r, col, alpha, shouldGlow);
     });
@@ -365,6 +510,9 @@ export function initGalaxyView(canvas) {
 
     ctx.clearRect(0, 0, width, height);
 
+    // Clear planet positions for this frame
+    lastPlanetPositions = [];
+
     const scaleFactor = calculateScaleFactor(lastData, x, y, width, height);
     drawCircularAxes(cx, cy, width, height, scaleFactor, lastData);
 
@@ -401,7 +549,8 @@ export function initGalaxyView(canvas) {
       const screenY = cy + py * scaleFactor;
 
       if (sceneId === "S3_GALAXY_CANDIDATES" && d.hasCandidate && d.candidatePlanets && alpha > 0.7) {
-        drawOrbitsAndPlanets(screenX, screenY, d, r, col);
+        const positions = drawOrbitsAndPlanets(screenX, screenY, d, r, col);
+        lastPlanetPositions.push(...positions);
       }
 
       const shouldGlow = alpha > 0.7;

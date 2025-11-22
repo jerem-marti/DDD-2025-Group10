@@ -255,6 +255,44 @@ body {
   height: 100%;
 }
 
+/* Tooltip */
+#tooltip {
+  position: fixed;
+  display: none;
+  background: rgba(17, 24, 39, 0.95);
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--text-main);
+  font-size: 13px;
+  line-height: 1.6;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  animation: tooltipFadeIn 0.15s ease-out;
+  white-space: normal;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#tooltip strong {
+  color: var(--accent);
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
 /* Smoother look for circles with better anti-aliasing */
 #scatter-svg .points circle {
   shape-rendering: geometricPrecision;

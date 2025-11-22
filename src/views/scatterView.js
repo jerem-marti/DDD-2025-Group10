@@ -1,11 +1,13 @@
 // src/views/scatterView.js
 import * as d3 from "d3";
+import { formatPlanetTooltip } from "../ui/tooltip.js";
 
 /**
  * Initialize scatterplot view on an <svg>.
  * @param {SVGSVGElement} svgEl
+ * @param {Object} tooltip - Tooltip controller
  */
-export function initScatterView(svgEl) {
+export function initScatterView(svgEl, tooltip = null) {
   if (!svgEl) {
     throw new Error("ScatterView: svg element is required");
   }
@@ -298,13 +300,15 @@ export function initScatterView(svgEl) {
     const circles = pointsG.selectAll("circle").data(validData, d => d.pl_name || d.hostname || d.id);
 
     // Enter + update
-    circles
+    const allCircles = circles
       .enter()
       .append("circle")
       .attr("cx", d => xScale(d[xVar]))
       .attr("cy", d => yScale(d[yVar]))
       .attr("r", 0)
-      .merge(circles)
+      .merge(circles);
+
+    allCircles
       .transition()
       .duration(300)
       .attr("cx", d => xScale(d[xVar]))
@@ -325,6 +329,56 @@ export function initScatterView(svgEl) {
         return "none";
       })
       .style("stroke-width", 0.5);
+
+    // Add tooltip interactions only for highlighted circles
+    if (tooltip) {
+      allCircles
+        .on("mouseenter", function(event, d) {
+          // Check if this circle is highlighted (opacity >= 0.6)
+          const isHighlighted = typeof opacity === "function" ? opacity(d) >= 0.6 : true;
+          
+          if (!isHighlighted) {
+            return; // No interaction for dimmed circles
+          }
+          
+          // Highlight circle with very visible stroke and shadow
+          d3.select(this)
+            .style("cursor", "pointer")
+            .transition()
+            .duration(200)
+            .style("stroke", "#22d3ee")
+            .style("stroke-width", 4)
+            .style("filter", "drop-shadow(0 0 8px #22d3ee)");
+          
+          d3.select(this).raise();
+
+          // Show tooltip
+          const content = formatPlanetTooltip(d);
+          tooltip.show(content, event.clientX, event.clientY);
+        })
+        .on("mousemove", function(event, d) {
+          // Only update tooltip if this is a highlighted circle
+          const isHighlighted = typeof opacity === "function" ? opacity(d) >= 0.6 : true;
+          if (isHighlighted) {
+            tooltip.show(formatPlanetTooltip(d), event.clientX, event.clientY);
+          }
+        })
+        .on("mouseleave", function(event, d) {
+          // Restore original stroke
+          const originalOpacity = typeof opacity === "function" ? opacity(d) : 0.7;
+          
+          d3.select(this)
+            .style("cursor", "default")
+            .transition()
+            .duration(200)
+            .style("stroke", originalOpacity > 0.6 ? "rgba(255,255,255,0.2)" : "none")
+            .style("stroke-width", 0.5)
+            .style("filter", "none");
+
+          // Hide tooltip
+          tooltip.hide();
+        });
+    }
 
     // Exit
     circles
