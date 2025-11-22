@@ -15,6 +15,16 @@ export function initGalaxyView(canvas, tooltip = null) {
   let hoveredSystem = null;
   let hoveredPlanet = null;
   let lastPlanetPositions = [];
+  
+  // Zoom and pan state
+  let zoomLevel = 1;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragStartPanX = 0;
+  let dragStartPanY = 0;
 
   function resize() {
     const dpr = window.devicePixelRatio || 1;
@@ -101,8 +111,8 @@ export function initGalaxyView(canvas, tooltip = null) {
       lastData.forEach((d) => {
         const px = x(d);
         const py = y(d);
-        const screenX = cx + px * scaleFactor;
-        const screenY = cy + py * scaleFactor;
+        const screenX = cx + px * scaleFactor + panX;
+        const screenY = cy + py * scaleFactor + panY;
 
         const dist = Math.sqrt((screenX - mouseX) ** 2 + (screenY - mouseY) ** 2);
         if (dist < minDist) {
@@ -111,9 +121,21 @@ export function initGalaxyView(canvas, tooltip = null) {
         }
       });
 
-      // In S3_GALAXY_CANDIDATES, only allow hover for systems with candidates
-      const canHover = !nearest ? false : 
-        (lastView.sceneId === "S3_GALAXY_CANDIDATES" ? nearest.hasCandidate : true);
+      // Check if system can be hovered based on scene rules
+      let canHover = false;
+      if (nearest) {
+        const { opacity } = encodings;
+        const alpha = typeof opacity === "function" ? opacity(nearest) : 
+                     (typeof encodings.baseOpacity === "function" ? encodings.baseOpacity(nearest) : 0.5);
+        
+        if (lastView.sceneId === "S2_SCATTER") {
+          canHover = alpha >= 0.6;
+        } else if (lastView.sceneId === "S3_GALAXY_CANDIDATES") {
+          canHover = nearest.hasCandidate && alpha > 0.7;
+        } else {
+          canHover = true; // Other scenes, all visible systems are hoverable
+        }
+      }
 
       if ((canHover ? nearest : null) !== hoveredSystem) {
         hoveredSystem = canHover ? nearest : null;
@@ -124,6 +146,14 @@ export function initGalaxyView(canvas, tooltip = null) {
         } else {
           tooltip.hide();
           canvas.style.cursor = "default";
+        }
+        // Redraw to show/hide hover animation
+        if (lastData && lastView) {
+          if (animationFrameId) {
+            draw(lastData, lastView);
+          } else {
+            draw(lastData, lastView);
+          }
         }
       } else if (hoveredSystem) {
         // Update tooltip position
@@ -136,6 +166,136 @@ export function initGalaxyView(canvas, tooltip = null) {
       hoveredPlanet = null;
       tooltip.hide();
       canvas.style.cursor = "default";
+      isDragging = false;
+    });
+  }
+  
+  // Zoom with mouse wheel - centered on mouse position
+  canvas.addEventListener("wheel", (event) => {
+    event.preventDefault();
+    
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    
+    // Get mouse position relative to center before zoom
+    const worldX = (mouseX - cx - panX) / zoomLevel;
+    const worldY = (mouseY - cy - panY) / zoomLevel;
+    
+    // Update zoom level
+    const zoomFactor = event.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(0.5, Math.min(10, zoomLevel * zoomFactor));
+    
+    // Adjust pan to keep mouse position stable
+    panX = mouseX - cx - worldX * newZoom;
+    panY = mouseY - cy - worldY * newZoom;
+    zoomLevel = newZoom;
+    
+    // Redraw
+    if (lastData && lastView) {
+      if (animationFrameId) {
+        draw(lastData, lastView);
+      } else {
+        draw(lastData, lastView);
+      }
+    }
+  }, { passive: false });
+  
+  // Pan with mouse drag
+  canvas.addEventListener("mousedown", (event) => {
+    if (!hoveredSystem && !hoveredPlanet && !isDragging) {
+      isDragging = true;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      dragStartPanX = panX;
+      dragStartPanY = panY;
+      canvas.style.cursor = "grabbing";
+    }
+  });
+  
+  canvas.addEventListener("mousemove", (event) => {
+    if (isDragging) {
+      const dx = event.clientX - dragStartX;
+      const dy = event.clientY - dragStartY;
+      panX = dragStartPanX + dx;
+      panY = dragStartPanY + dy;
+      
+      // Redraw
+      if (lastData && lastView) {
+        if (animationFrameId) {
+          draw(lastData, lastView);
+        } else {
+          draw(lastData, lastView);
+        }
+      }
+    }
+  });
+  
+  canvas.addEventListener("mouseup", () => {
+    if (isDragging) {
+      isDragging = false;
+      canvas.style.cursor = hoveredSystem || hoveredPlanet ? "pointer" : "default";
+    }
+  });
+  
+  // Get zoom controls
+  const zoomControls = document.getElementById('zoom-controls');
+  const zoomInBtn = document.getElementById('zoom-in');
+  const zoomOutBtn = document.getElementById('zoom-out');
+  const zoomResetBtn = document.getElementById('zoom-reset');
+  
+  // Zoom control handlers - zoom centered on canvas center
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', () => {
+      const rect = canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const worldX = -panX / zoomLevel;
+      const worldY = -panY / zoomLevel;
+      
+      const newZoom = Math.min(10, zoomLevel * 1.5);
+      panX = -worldX * newZoom;
+      panY = -worldY * newZoom;
+      zoomLevel = newZoom;
+      
+      if (lastData && lastView) {
+        draw(lastData, lastView);
+      }
+    });
+  }
+  
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', () => {
+      const rect = canvas.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const worldX = -panX / zoomLevel;
+      const worldY = -panY / zoomLevel;
+      
+      const newZoom = Math.max(0.5, zoomLevel * 0.67);
+      panX = -worldX * newZoom;
+      panY = -worldY * newZoom;
+      zoomLevel = newZoom;
+      
+      if (lastData && lastView) {
+        draw(lastData, lastView);
+      }
+    });
+  }
+  
+  if (zoomResetBtn) {
+    zoomResetBtn.addEventListener('click', () => {
+      zoomLevel = 1;
+      panX = 0;
+      panY = 0;
+      
+      if (lastData && lastView) {
+        draw(lastData, lastView);
+      }
     });
   }
 
@@ -163,7 +323,8 @@ export function initGalaxyView(canvas, tooltip = null) {
     const xScale = (width * 0.9) / xRange;
     const yScale = (height * 0.9) / yRange;
     
-    return Math.min(xScale, yScale, 200); // Increased cap to allow more zoom
+    // Apply user zoom level
+    return Math.min(xScale, yScale, 200) * zoomLevel;
   }
 
   /**
@@ -171,6 +332,10 @@ export function initGalaxyView(canvas, tooltip = null) {
    */
   function drawCircularAxes(cx, cy, width, height, scaleFactor, data) {
     if (data.length === 0) return;
+
+    // Apply pan offset to center
+    const transformedCx = cx + panX;
+    const transformedCy = cy + panY;
 
     // Get max distance from data for scale
     const positions = data.map(d => {
@@ -180,81 +345,95 @@ export function initGalaxyView(canvas, tooltip = null) {
     });
     const maxDist = Math.max(...positions);
     
-    // Draw concentric circles (distance rings)
-    const numRings = 4;
+    // Draw concentric circles (distance rings) - more rings when zoomed in
+    const numRings = Math.max(4, Math.min(12, Math.floor(4 * zoomLevel)));
     ctx.globalAlpha = 0.15;
     ctx.strokeStyle = "rgba(148, 163, 184, 0.3)";
     ctx.lineWidth = 1;
     
     for (let i = 1; i <= numRings; i++) {
-      const radius = (Math.min(width, height) * 0.4 * i) / numRings;
+      const radius = (Math.min(width, height) * 0.4 * i) / numRings * zoomLevel;
       ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.arc(transformedCx, transformedCy, radius, 0, Math.PI * 2);
       ctx.stroke();
       
-      // Add distance labels
+      // Add distance labels with units
       const distValue = (maxDist * i) / numRings;
-      ctx.globalAlpha = 0.4;
-      ctx.fillStyle = "#9ca3af";
-      ctx.font = "10px system-ui";
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = "#e5e7eb";
+      ctx.font = "11px system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`${Math.round(distValue * 10) / 10}`, cx, cy - radius - 5);
+      ctx.textBaseline = "bottom";
+      // Format: show more precision for small values
+      const formattedDist = distValue < 1 ? distValue.toFixed(2) : distValue < 10 ? distValue.toFixed(1) : Math.round(distValue);
+      ctx.fillText(formattedDist, transformedCx, transformedCy - radius - 8);
     }
     
-    // Draw radial lines (angle markers every 45°)
+    // Draw radial lines (angle markers) - more angles when zoomed in
+    const angleStep = zoomLevel > 2 ? 15 : zoomLevel > 1.5 ? 30 : 45;
     ctx.globalAlpha = 0.1;
     ctx.strokeStyle = "rgba(148, 163, 184, 0.2)";
     ctx.lineWidth = 1;
     
-    for (let angle = 0; angle < 360; angle += 45) {
+    for (let angle = 0; angle < 360; angle += angleStep) {
       const rad = (angle * Math.PI) / 180;
-      const maxRadius = Math.min(width, height) * 0.4;
+      const maxRadius = Math.min(width, height) * 0.4 * zoomLevel;
       
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
+      ctx.moveTo(transformedCx, transformedCy);
       ctx.lineTo(
-        cx + Math.cos(rad) * maxRadius,
-        cy + Math.sin(rad) * maxRadius
+        transformedCx + Math.cos(rad) * maxRadius,
+        transformedCy + Math.sin(rad) * maxRadius
       );
       ctx.stroke();
       
-      // Add angle labels
+      // Add angle labels (cardinal directions)
       if (angle % 90 === 0) {
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = "#9ca3af";
-        ctx.font = "11px system-ui";
+        ctx.globalAlpha = 0.6;
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "bold 12px system-ui, -apple-system, sans-serif";
         ctx.textAlign = "center";
-        const labelRadius = maxRadius + 20;
+        ctx.textBaseline = "middle";
+        const labelRadius = maxRadius + 25;
         const labelText = angle === 0 ? "0°" : angle === 90 ? "90°" : angle === 180 ? "180°" : "270°";
         ctx.fillText(
           labelText,
-          cx + Math.cos(rad) * labelRadius,
-          cy + Math.sin(rad) * labelRadius + 4
+          transformedCx + Math.cos(rad) * labelRadius,
+          transformedCy + Math.sin(rad) * labelRadius
         );
       }
     }
     
-    // Add center label
+    // Add center label - follows pan
     ctx.globalAlpha = 0.6;
     ctx.fillStyle = "#e5e7eb";
     ctx.font = "12px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("Center", cx, cy - 5);
+    ctx.fillText("Center", transformedCx, transformedCy - 5);
     ctx.font = "10px system-ui";
-    ctx.fillText("(Solar System)", cx, cy + 8);
+    ctx.fillText("(Solar System)", transformedCx, transformedCy + 8);
     
-    // Add axis labels in corners
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = "#9ca3af";
-    ctx.font = "11px system-ui";
+    // Add improved axis descriptions in corners
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = "#e5e7eb";
+    ctx.font = "12px system-ui, -apple-system, sans-serif";
+    ctx.textBaseline = "alphabetic";
     
     // Bottom right - distance scale label
     ctx.textAlign = "right";
-    ctx.fillText("Distance: log₁₀(parsecs)", width - 10, height - 10);
+    ctx.fillText("Radial Distance", width - 15, height - 25);
+    ctx.globalAlpha = 0.5;
+    ctx.font = "10px system-ui, -apple-system, sans-serif";
+    ctx.fillText("log₁₀(parsecs) from Solar System", width - 15, height - 12);
     
     // Top left - angle label
+    ctx.globalAlpha = 0.7;
+    ctx.font = "12px system-ui, -apple-system, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("Angle: Galactic longitude (°)", 10, 20);
+    ctx.fillText("Angular Position", 15, 20);
+    ctx.globalAlpha = 0.5;
+    ctx.font = "10px system-ui, -apple-system, sans-serif";
+    ctx.fillText("Galactic longitude (degrees)", 15, 33);
     
     // Reset alpha
     ctx.globalAlpha = 1;
@@ -436,8 +615,8 @@ export function initGalaxyView(canvas, tooltip = null) {
           ? baseOpacity(d)
           : baseOpacity;
 
-      const screenX = cx + px * scaleFactor;
-      const screenY = cy + py * scaleFactor;
+      const screenX = cx + px * scaleFactor + panX;
+      const screenY = cy + py * scaleFactor + panY;
 
       // Draw candidate planets orbiting around stars (only in Scene 3)
       if (sceneId === "S3_GALAXY_CANDIDATES" && d.hasCandidate && d.candidatePlanets && alpha > 0.7) {
@@ -449,8 +628,12 @@ export function initGalaxyView(canvas, tooltip = null) {
       const isHovered = hoveredSystem === d;
       const shouldGlow = alpha > 0.7 || isHovered;
       
-      // Enhanced glow for hovered system - very visible
-      if (isHovered) {
+      // Enhanced glow for hovered system - very visible (only if system is visible/hoverable)
+      const canBeHovered = (sceneId === "S2_SCATTER" && alpha >= 0.6) || 
+                           (sceneId === "S3_GALAXY_CANDIDATES" && d.hasCandidate && alpha > 0.7) || 
+                           (sceneId !== "S2_SCATTER" && sceneId !== "S3_GALAXY_CANDIDATES");
+      
+      if (isHovered && canBeHovered) {
         // Draw multiple layers for intense glow
         ctx.globalAlpha = 0.6;
         const hoverGradient1 = ctx.createRadialGradient(screenX, screenY, 0, screenX, screenY, r * 8);
@@ -545,8 +728,8 @@ export function initGalaxyView(canvas, tooltip = null) {
           ? baseOpacity(d)
           : baseOpacity;
 
-      const screenX = cx + px * scaleFactor;
-      const screenY = cy + py * scaleFactor;
+      const screenX = cx + px * scaleFactor + panX;
+      const screenY = cy + py * scaleFactor + panY;
 
       if (sceneId === "S3_GALAXY_CANDIDATES" && d.hasCandidate && d.candidatePlanets && alpha > 0.7) {
         const positions = drawOrbitsAndPlanets(screenX, screenY, d, r, col);
@@ -566,11 +749,22 @@ export function initGalaxyView(canvas, tooltip = null) {
   return {
     show() {
       canvas.style.display = "block";
+      if (zoomControls) {
+        zoomControls.style.display = "flex";
+      }
     },
     hide() {
       canvas.style.display = "none";
+      if (zoomControls) {
+        zoomControls.style.display = "none";
+      }
     },
     update(data, view) {
+      // Reset zoom on every update (when navigating between scenes)
+      zoomLevel = 1;
+      panX = 0;
+      panY = 0;
+      
       // Ensure canvas is properly sized before drawing
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();

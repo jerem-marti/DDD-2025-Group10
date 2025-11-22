@@ -14,6 +14,10 @@ export function initScatterView(svgEl, tooltip = null) {
 
   const svg = d3.select(svgEl);
   const margin = { top: 30, right: 20, bottom: 50, left: 60 };
+  
+  // Zoom state
+  let currentZoom = d3.zoomIdentity;
+  let zoomBehavior = null;
 
   // Function to get current dimensions
   function getDimensions() {
@@ -59,6 +63,88 @@ export function initScatterView(svgEl, tooltip = null) {
 
   let xScale = d3.scaleLinear().range([0, innerWidth]);
   let yScale = d3.scaleLinear().range([innerHeight, 0]);
+  
+  // Original scales for reset
+  let xScaleOriginal = xScale.copy();
+  let yScaleOriginal = yScale.copy();
+  
+  // Get zoom controls
+  const zoomControls = document.getElementById('zoom-controls');
+  const zoomInBtn = document.getElementById('zoom-in');
+  const zoomOutBtn = document.getElementById('zoom-out');
+  const zoomResetBtn = document.getElementById('zoom-reset');
+  
+  // Setup zoom behavior
+  function setupZoom() {
+    zoomBehavior = d3.zoom()
+      .scaleExtent([1, 20])
+      .on("zoom", (event) => {
+        currentZoom = event.transform;
+        
+        // Update scales with zoom transform
+        const newXScale = currentZoom.rescaleX(xScaleOriginal);
+        const newYScale = currentZoom.rescaleY(yScaleOriginal);
+        
+        // Update axes with proper formatting
+        const xAxis = d3.axisBottom(newXScale)
+          .ticks(8)
+          .tickFormat(d => {
+            if (d >= 1000) return d3.format(".2s")(d);
+            if (d >= 10) return d3.format(".0f")(d);
+            if (d >= 1) return d3.format(".1f")(d);
+            return d3.format(".2f")(d);
+          });
+        
+        const yAxis = d3.axisLeft(newYScale)
+          .ticks(8)
+          .tickFormat(d => {
+            if (d >= 1000) return d3.format(".2s")(d);
+            if (d >= 10) return d3.format(".0f")(d);
+            if (d >= 1) return d3.format(".1f")(d);
+            return d3.format(".2f")(d);
+          });
+        
+        xAxisG.call(xAxis);
+        yAxisG.call(yAxis);
+        
+        // Update points positions only (not size)
+        pointsG.selectAll("circle")
+          .attr("cx", d => newXScale(d[currentView.xVar]))
+          .attr("cy", d => newYScale(d[currentView.yVar]));
+        
+        // Update background layers
+        updateBackgroundLayers(newXScale, newYScale);
+      });
+    
+    svg.call(zoomBehavior);
+  }
+  
+  // Zoom control handlers
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener('click', () => {
+      if (zoomBehavior) {
+        svg.transition().duration(300).call(zoomBehavior.scaleBy, 1.5);
+      }
+    });
+  }
+  
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener('click', () => {
+      if (zoomBehavior) {
+        svg.transition().duration(300).call(zoomBehavior.scaleBy, 0.67);
+      }
+    });
+  }
+  
+  if (zoomResetBtn) {
+    zoomResetBtn.addEventListener('click', () => {
+      if (zoomBehavior) {
+        svg.transition().duration(300).call(zoomBehavior.transform, d3.zoomIdentity);
+      }
+    });
+  }
+  
+  let currentView = null;
 
   /**
    * Filter outliers using IQR method (configurable)
@@ -226,7 +312,81 @@ export function initScatterView(svgEl, tooltip = null) {
     }
   }
 
+  function updateBackgroundLayers(xScl, yScl) {
+    if (!currentView) return;
+    const { encodings = {} } = currentView;
+    
+    bgG.selectAll("*").remove();
+    
+    // Rocky window
+    if (encodings.rockyWindow) {
+      const { minR, maxR } = encodings.rockyWindow;
+      bgG.append("rect")
+        .attr("class", "bg-rocky-window")
+        .attr("x", xScl(minR))
+        .attr("y", 0)
+        .attr("width", xScl(maxR) - xScl(minR))
+        .attr("height", innerHeight)
+        .style("fill", "#22d3ee")
+        .style("opacity", 0.08);
+    }
+    
+    // Habitable zone bands
+    if (encodings.hzBands) {
+      const { optimistic, conservative } = encodings.hzBands;
+      if (optimistic) {
+        bgG.append("rect")
+          .attr("x", xScl(optimistic.min))
+          .attr("y", 0)
+          .attr("width", xScl(optimistic.max) - xScl(optimistic.min))
+          .attr("height", innerHeight)
+          .style("fill", "#4ade80")
+          .style("opacity", 0.06);
+      }
+      if (conservative) {
+        bgG.append("rect")
+          .attr("x", xScl(conservative.min))
+          .attr("y", 0)
+          .attr("width", xScl(conservative.max) - xScl(conservative.min))
+          .attr("height", innerHeight)
+          .style("fill", "#4ade80")
+          .style("opacity", 0.1);
+      }
+    }
+    
+    // Gravity zone
+    if (encodings.gravityZone && currentView.xVar === "pl_rade" && currentView.yVar === "pl_bmasse") {
+      const { gMin, gMax } = encodings.gravityZone;
+      const radii = d3.range(0.1, 10, 0.05).filter(r => {
+        const massMin = gMin * r * r;
+        const massMax = gMax * r * r;
+        return massMax >= yScl.domain()[0] && massMin <= yScl.domain()[1] &&
+               r >= xScl.domain()[0] && r <= xScl.domain()[1];
+      });
+      
+      if (radii.length > 0) {
+        const area = d3.area()
+          .x(d => xScl(d))
+          .y0(d => yScl(gMin * d * d))
+          .y1(d => yScl(gMax * d * d));
+        
+        bgG.append("path")
+          .attr("d", area(radii))
+          .style("fill", "#fb923c")
+          .style("opacity", 0.12);
+      }
+    }
+  }
+
   function update(data, view) {
+    currentView = view;
+    
+    // Always reset zoom when updating (including when going back to previous steps)
+    if (zoomBehavior) {
+      svg.call(zoomBehavior.transform, d3.zoomIdentity);
+      currentZoom = d3.zoomIdentity;
+    }
+    
     // Recalculate dimensions in case window was resized
     const dims = getDimensions();
     width = dims.width;
@@ -261,6 +421,15 @@ export function initScatterView(svgEl, tooltip = null) {
     // Create scales with outlier handling
     xScale = createScale(xVals, [0, innerWidth], scaleConfig.x || {});
     yScale = createScale(yVals, [innerHeight, 0], scaleConfig.y || {});
+    
+    // Store original scales for zoom reset
+    xScaleOriginal = xScale.copy();
+    yScaleOriginal = yScale.copy();
+    
+    // Setup zoom if not already done
+    if (!zoomBehavior) {
+      setupZoom();
+    }
 
     // Draw background elements
     drawBackground(view, xScale, yScale);
@@ -392,9 +561,15 @@ export function initScatterView(svgEl, tooltip = null) {
   return {
     show() {
       svgEl.style.display = "block";
+      if (zoomControls) {
+        zoomControls.style.display = "flex";
+      }
     },
     hide() {
       svgEl.style.display = "none";
+      if (zoomControls) {
+        zoomControls.style.display = "none";
+      }
     },
     update(data, view) {
       update(data || [], view || {});
