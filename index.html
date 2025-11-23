@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <title>Galaxy of Filters</title>
     <link rel="stylesheet" href="/src/styles/main.css" />
+    <link rel="stylesheet" href="/src/styles/small-multiples.css" />
   </head>
   <body>
     <div id="app">
@@ -24,13 +25,13 @@
       <main id="viz">
         <canvas id="galaxy-canvas"></canvas>
         <svg id="scatter-svg" style="display: none"></svg>
+        <div id="small-multiples"></div>
         <div id="tooltip"></div>
         <div id="zoom-controls">
           <button id="zoom-in" title="Zoom In">+</button>
           <button id="zoom-out" title="Zoom Out">−</button>
           <button id="zoom-reset" title="Reset Zoom">⟲</button>
         </div>
-        <!-- small multiples container can go here later -->
       </main>
     </div>
 

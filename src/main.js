@@ -3,6 +3,7 @@ import { loadData } from "./data-loader.js";
 import { state, setDatasets, subscribe, goToScene } from "./state.js";
 import { initGalaxyView } from "./views/galaxyView.js";
 import { initScatterView } from "./views/scatterView.js";
+import { initSmallMultiplesView } from "./views/smallMultiplesView.js";
 import { initSidebar } from "./ui/sidebar.js";
 import { initControls } from "./ui/controls.js";
 import { initTooltip } from "./ui/tooltip.js";
@@ -15,6 +16,7 @@ async function init() {
   // Grab DOM elements
   const galaxyCanvas = document.getElementById("galaxy-canvas");
   const scatterSvg = document.getElementById("scatter-svg");
+  const smallMultiplesEl = document.getElementById("small-multiples");
   const tooltipEl = document.getElementById("tooltip");
 
   const sidebarHeading = document.getElementById("sidebar-heading");
@@ -30,6 +32,7 @@ async function init() {
   const tooltip = initTooltip(tooltipEl);
   const galaxyView = initGalaxyView(galaxyCanvas, tooltip);
   const scatterView = initScatterView(scatterSvg, tooltip);
+  const smallMultiplesView = initSmallMultiplesView(smallMultiplesEl);
   const sidebar = initSidebar({
     headingEl: sidebarHeading,
     chatEl: sidebarChat,
@@ -51,18 +54,24 @@ async function init() {
     const full = state.datasets[datasetName] || [];
     const data = scene.filterFn ? full.filter(scene.filterFn) : full;
 
+    // Remove small-multiples class by default
+    document.body.classList.remove("show-small-multiples");
+
     if (scene.view.type === "galaxy") {
       scatterView.hide();
+      smallMultiplesView.hide();
       galaxyView.show();
       galaxyView.update(data, scene.view);
     } else if (scene.view.type === "scatter") {
       galaxyView.hide();
+      smallMultiplesView.hide();
       scatterView.show();
       scatterView.update(data, scene.view);
     } else if (scene.view.type === "transition") {
-      galaxyView.show();
+      galaxyView.hide();
       scatterView.hide();
-      galaxyView.transitionToGrid(data, scene.view);
+      smallMultiplesView.show();
+      smallMultiplesView.update(data, scene.view);
       document.body.classList.add("show-small-multiples");
     }
 

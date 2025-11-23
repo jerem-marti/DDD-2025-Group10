@@ -144,10 +144,14 @@ for (const row of records) {
       candidateCountOptimistic: 0,
       candidateCountConservative: 0,
       candidatePlanets: [],
+      planetCount: 0,
     };
 
     systemsMap.set(planet.hostname, system);
   }
+
+  // Count all planets in the system
+  system.planetCount += 1;
 
   // System-level has_data can be OR of all planets
   system.has_data = system.has_data || planet.has_data;

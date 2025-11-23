@@ -406,11 +406,12 @@ body {
 /* You can emphasize 1 g line specifically if you give it a class
    or data attribute later, but for now they all share the same style. */
 
-/* ─────────────────────────────────────────
+/* ──────────────────────────────────────────
    Utility
 ────────────────────────────────────────── */
 
-.show-small-multiples #viz {
-  /* Example: dim the main viz when cards appear */
-  filter: blur(1px) brightness(0.8);
+.show-small-multiples #galaxy-canvas,
+.show-small-multiples #scatter-svg {
+  /* Hide other views when showing small multiples */
+  display: none;
 }
