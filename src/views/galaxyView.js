@@ -140,7 +140,7 @@ export function initGalaxyView(canvas, tooltip = null) {
       if ((canHover ? nearest : null) !== hoveredSystem) {
         hoveredSystem = canHover ? nearest : null;
         if (hoveredSystem) {
-          const content = formatSystemTooltip(hoveredSystem);
+          const content = formatSystemTooltip(hoveredSystem, lastView?.sceneId);
           tooltip.show(content, event.clientX, event.clientY);
           canvas.style.cursor = "pointer";
         } else {
@@ -157,7 +157,7 @@ export function initGalaxyView(canvas, tooltip = null) {
         }
       } else if (hoveredSystem) {
         // Update tooltip position
-        tooltip.show(formatSystemTooltip(hoveredSystem), event.clientX, event.clientY);
+        tooltip.show(formatSystemTooltip(hoveredSystem, lastView?.sceneId), event.clientX, event.clientY);
       }
     });
 

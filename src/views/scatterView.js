@@ -318,6 +318,10 @@ export function initScatterView(svgEl, tooltip = null) {
     
     bgG.selectAll("*").remove();
     
+    // Get current domain to check if zones are visible
+    const xDomain = xScl.domain();
+    const yDomain = yScl.domain();
+    
     // Rocky window
     if (encodings.rockyWindow) {
       const { minR, maxR } = encodings.rockyWindow;
@@ -354,7 +358,31 @@ export function initScatterView(svgEl, tooltip = null) {
       }
     }
     
-    // Gravity zone
+    // Gravity band (horizontal)
+    if (encodings.gravityBand) {
+      const { min, max } = encodings.gravityBand;
+      // Y scale is inverted (higher values at bottom), so yScl(max) gives top position
+      const yTop = yScl(max);  // Top of band (max gravity value)
+      const yBottom = yScl(min);  // Bottom of band (min gravity value)
+      
+      // Clamp to visible area
+      const clampedTop = Math.max(0, Math.min(innerHeight, yTop));
+      const clampedBottom = Math.max(0, Math.min(innerHeight, yBottom));
+      const height = clampedBottom - clampedTop;
+      
+      if (height > 0) {
+        bgG.append("rect")
+          .attr("class", "bg-gravity-band")
+          .attr("x", 0)
+          .attr("y", clampedTop)
+          .attr("width", innerWidth)
+          .attr("height", height)
+          .style("fill", "#facc15")
+          .style("opacity", 0.15);
+      }
+    }
+    
+    // Gravity zone (curved band for mass-radius plot)
     if (encodings.gravityZone && currentView.xVar === "pl_rade" && currentView.yVar === "pl_bmasse") {
       const { gMin, gMax } = encodings.gravityZone;
       const radii = d3.range(0.1, 10, 0.05).filter(r => {

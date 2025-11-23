@@ -146,7 +146,7 @@ export function formatPlanetTooltip(planet) {
 /**
  * Format system data for tooltip display
  */
-export function formatSystemTooltip(system) {
+export function formatSystemTooltip(system, sceneId = null) {
   const lines = [`<strong>${system.hostname || 'Unknown System'}</strong>`];
   
   if (system.sy_pnum != null) {
@@ -169,11 +169,18 @@ export function formatSystemTooltip(system) {
     lines.push(`Mass: ${system.st_mass.toFixed(2)} M☉`);
   }
   
-  if (system.hasCandidate) {
+  // Only show candidate info on step 6 (S3_GALAXY_CANDIDATES), not on step 1
+  if (system.hasCandidate && sceneId === 'S3_GALAXY_CANDIDATES') {
     const conserv = system.candidateCountConservative || 0;
     const optim = system.candidateCountOptimistic || 0;
-    lines.push(`<span style="color: #4ade80">★ ${conserv} conservative</span>`);
-    lines.push(`<span style="color: #22d3ee">★ ${optim} optimistic</span>`);
+    // Optimistic count includes conservative, so show only non-conservative optimistic
+    const optimOnly = optim - conserv;
+    if (conserv > 0) {
+      lines.push(`<span style="color: #4ade80">★ ${conserv} conservative</span>`);
+    }
+    if (optimOnly > 0) {
+      lines.push(`<span style="color: #22d3ee">★ ${optimOnly} optimistic only</span>`);
+    }
   }
   
   return lines.join('<br>');
