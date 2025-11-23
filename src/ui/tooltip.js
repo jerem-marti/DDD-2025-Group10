@@ -169,6 +169,10 @@ export function formatSystemTooltip(system, sceneId = null) {
     lines.push(`Mass: ${system.st_mass.toFixed(2)} M☉`);
   }
   
+  if (system.st_rad != null) {
+    lines.push(`Radius: ${system.st_rad.toFixed(2)} R☉`);
+  }
+  
   // Only show candidate info on step 6 (S3_GALAXY_CANDIDATES), not on step 1
   if (system.hasCandidate && sceneId === 'S3_GALAXY_CANDIDATES') {
     const conserv = system.candidateCountConservative || 0;

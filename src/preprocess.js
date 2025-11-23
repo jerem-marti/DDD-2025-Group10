@@ -75,6 +75,7 @@ for (const row of records) {
 
     st_lum: toNumber(row.st_lum),
     st_mass: toNumber(row.st_mass),
+    st_rad: toNumber(row.st_rad),
     st_teff: toNumber(row.st_teff),
     st_spectype: row.st_spectype || null,
     st_age: toNumber(row.st_age),
@@ -128,6 +129,7 @@ for (const row of records) {
       st_spectype: planet.st_spectype,
       st_teff: planet.st_teff,
       st_mass: planet.st_mass,
+      st_rad: planet.st_rad,
       st_lum: planet.st_lum,
       st_age: planet.st_age,
       st_met: planet.st_met,
