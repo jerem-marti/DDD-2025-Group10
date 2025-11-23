@@ -90,25 +90,6 @@ graph TB
     
     F1 --> F1
     F2 --> F2
-
-    style Topic fill:#e6e6fa,stroke:#9370db,stroke-width:3px
-    style Q1 fill:#e6f3ff,stroke:#4a90e2,stroke-width:2px
-    style Q2 fill:#e6f3ff,stroke:#4a90e2,stroke-width:2px
-    style Q3 fill:#e6f3ff,stroke:#4a90e2,stroke-width:2px
-    style A1 fill:#fff4e6,stroke:#ff9800,stroke-width:2px
-    style A2 fill:#fff4e6,stroke:#ff9800,stroke-width:2px
-    style A3 fill:#fff4e6,stroke:#ff9800,stroke-width:2px
-    style D1 fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
-    style D2 fill:#e8f5e9,stroke:#4caf50,stroke-width:2px
-    style V1 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style V2 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style V3 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style V4 fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
-    style F1 fill:#fff9c4,stroke:#fbc02d,stroke-width:3px
-    style F2 fill:#fff9c4,stroke:#fbc02d,stroke-width:3px
-    style T1 fill:#e0f7fa,stroke:#00acc1,stroke-width:2px
-    style T2 fill:#e0f7fa,stroke:#00acc1,stroke-width:2px
-    style T3 fill:#e0f7fa,stroke:#00acc1,stroke-width:2px
 ```
 
 ---
