@@ -53,6 +53,33 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+/* Custom scrollbar for sidebar */
+#sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+#sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) rgba(15, 23, 42, 0.3);
 }
 
 #sidebar-heading {
@@ -65,10 +92,140 @@ body {
   border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
+/* Citation bubbles */
+.citations-container {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+  margin-bottom: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.citation-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.citation-bubble {
+  position: relative;
+  display: inline-block;
+  min-width: 24px;
+  max-width: 240px;
+  height: 24px;
+  padding: 0 0.5rem;
+  line-height: 24px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #60a5fa;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.citation-bubble:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.6);
+  transform: scale(1.1);
+}
+
+.citation-tooltip {
+  position: fixed;
+  width: 280px;
+  max-width: calc(100vw - 40px);
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 8px;
+  padding: 0.9rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 10000;
+  text-align: left;
+  overflow: visible;
+}
+
+.citation-tooltip.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.citation-tooltip::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  border: 6px solid transparent;
+}
+
+/* Tooltip above bubble */
+.citation-tooltip.tooltip-top::after {
+  top: 100%;
+  border-top-color: rgba(15, 23, 42, 0.98);
+}
+
+/* Tooltip below bubble */
+.citation-tooltip.tooltip-bottom::after {
+  bottom: 100%;
+  border-bottom-color: rgba(15, 23, 42, 0.98);
+}
+
+.citation-tooltip-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #60a5fa;
+  margin-bottom: 0.6rem;
+  line-height: 1.3;
+}
+
+.citation-tooltip-section {
+  margin-bottom: 0.7rem;
+}
+
+.citation-tooltip-section:last-of-type {
+  margin-bottom: 0.5rem;
+}
+
+.citation-tooltip-section strong {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin-bottom: 0.3rem;
+}
+
+.citation-tooltip-section p {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+.citation-tooltip-footer {
+  font-size: 0.65rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  font-style: italic;
+}
+
 /* Chat area */
 #sidebar-chat {
-  flex: 1;
-  overflow-y: auto;
+  flex: 0 0 auto;
+  overflow: visible;
   padding-right: 0.25rem;
   display: flex;
   flex-direction: column;
