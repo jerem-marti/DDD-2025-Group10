@@ -66,7 +66,8 @@ export const scenes = [
       diagramHint: "Polar sketch of the galaxy with two stars: one near, one far.",
       notes: [
         "Dot size roughly encodes how many known planets a system has.",
-        "All stars share the same colour for now; spectral types come later."
+        "We use galactic longitude for the angle around the map.",
+        "Radial distance uses a logarithmic scale so that nearby and far-away systems can fit on the same view."
       ]
     }
   },
@@ -106,11 +107,17 @@ export const scenes = [
         {
           from: "guide",
           text: "Here each dot is a planet. Left–right is size, bottom–top is mass. Tiny rocks bottom-left, giant gas worlds top-right."
+        },
+        {
+          from: "guide",
+          text: "If you are curious: the axes use Earth units. A value of 1 on each axis corresponds to Earth’s radius or mass."
         }
       ],
       diagramHint: "Plane with labels: small/light vs giant planets, Earth marked in between.",
       notes: [
-        "No habitability filters yet – just raw diversity."
+        "The x-axis is planet radius in Earth radii (R⊕).",
+        "The y-axis is planet mass in Earth masses (M⊕).",
+        "No habitability filters yet - just the full diversity of known planets."
       ]
     }
   },
@@ -148,30 +155,44 @@ export const scenes = [
       }
     },
     sidebarContent: {
-        heading: "Step 3 · Looking for rocky-size planets",
-        chat: [ /* ... */ ],
-        diagramHint: "Size line: Mars → Earth → Super-Earth → Neptune, rocky range highlighted.",
-        notes: [
-            "Rocky planets are coloured; others stay greyed out.",
-            "Dot size also encodes radius."
-        ],
-        legend: {
-            sections: [
-              {
-                title: "Dot",
-                items: [
-                  { type: "color", color: COLORS.rocky, label: "Rocky-size planet" },
-                  { type: "color", color: COLORS.grey, label: "Other planet" }
-                ]
-              },
-              {
-                title: "Area",
-                items: [
-                  { type: "area", color: COLORS.rocky, label: "Rocky size zone (0.5–1.6 R⊕)" }
-                ]
-              }
-            ]
+      heading: "Step 3 · Looking for rocky-size planets",
+      chat: [
+        {
+          from: "user",
+          text: "How do we spot rocky worlds in all these points?"
+        },
+        {
+          from: "guide",
+          text: "We focus on planets in a rocky size range, where they are more likely to be made of rock and metal instead of mostly gas."
+        },
+        {
+          from: "guide",
+          text: "The blue band shows that size range in radius, and coloured dots are planets whose mass and radius fit this rocky profile."
         }
+      ],
+      diagramHint: "Size line: Mars → Earth → Super-Earth → Neptune, rocky range highlighted.",
+      notes: [
+        "Rocky planets are coloured; others stay greyed out.",
+        "Dot size also encodes radius.",
+        "The rocky size window here is roughly 0.5 to 1.6 times Earth’s radius."
+      ],
+      legend: {
+        sections: [
+          {
+            title: "Dot",
+            items: [
+              { type: "color", color: COLORS.rocky, label: "Rocky-size planet" },
+              { type: "color", color: COLORS.grey, label: "Other planet" }
+            ]
+          },
+          {
+            title: "Area",
+            items: [
+              { type: "area", color: COLORS.rocky, label: "Rocky size zone (0.5–1.6 R⊕)" }
+            ]
+          }
+        ]
+      }
     }
   },
 
@@ -202,17 +223,17 @@ export const scenes = [
         baseOpacity: () => 0.2,
         baseSize: () => 2.5,
         color: (p) => {
-            if (!p.pl_is_rocky_size) return COLORS.grey;
-            const g = p.pl_g_rel;
-            if (g == null) return COLORS.grey;
-            if (g >= 0.5 && g <= 1.5) return COLORS.gravity;
-            return COLORS.grey;
+          if (!p.pl_is_rocky_size) return COLORS.grey;
+          const g = p.pl_g_rel;
+          if (g == null) return COLORS.grey;
+          if (g >= 0.5 && g <= 1.5) return COLORS.gravity;
+          return COLORS.grey;
         },
         opacity: (p) => {
-            if (!p.pl_is_rocky_size) return 0.2;
-            const g = p.pl_g_rel;
-            if (g != null && g >= 0.5 && g <= 1.5) return 0.9;
-            return 0.2;
+          if (!p.pl_is_rocky_size) return 0.2;
+          const g = p.pl_g_rel;
+          if (g != null && g >= 0.5 && g <= 1.5) return 0.9;
+          return 0.2;
         },
         size: (p) => p.pl_rade ?? 1,
         shape: () => "circle",
@@ -230,13 +251,18 @@ export const scenes = [
         { from: "user", text: "Earth-size ≠ Earth-gravity, right?" },
         {
           from: "guide",
-          text: "Right. For the same radius, more mass means stronger gravity. We use mass and radius to estimate how heavy you’d feel."
+          text: "Right. For the same radius, more mass means stronger gravity. We use mass and radius to estimate how heavy you would feel."
+        },
+        {
+          from: "guide",
+          text: "If you are curious: in Earth units we approximate surface gravity as g_rel ≈ mass_rel / radius_rel²."
         }
       ],
       diagramHint: "Three circles with sparse, medium, dense hatch labelled low / ok / high g.",
       notes: [
-        "Medium hatch ~ comfortable band (0.5–1.5 g).",
-        "Gravity bands are shown in the background."
+        "Coloured points are rocky planets whose estimated surface gravity is between about 0.5 and 1.5 times Earth’s gravity.",
+        "The diagonal band in the background shows where mass and radius combine to give that comfortable gravity.",
+        "Formula hint: g_rel ≈ mass_rel / radius_rel² when mass and radius are measured relative to Earth."
       ],
       legend: {
         sections: [
@@ -281,8 +307,8 @@ export const scenes = [
       },
       encodings: {
         hzBands: {
-            optimistic: { min: 0.32, max: 1.78 },
-            conservative: { min: 0.35, max: 1.04 }
+          optimistic: { min: 0.32, max: 1.78 },
+          conservative: { min: 0.35, max: 1.04 }
         },
         gravityBand: { min: 0.5, max: 1.5 },
         baseColor: () => COLORS.grey,
@@ -290,23 +316,23 @@ export const scenes = [
         size: (p) => p.pl_rade ?? 1,
         shape: () => "circle",
         color: (p) => {
-            // Must be rocky (Step 3)
-            if (!p.pl_is_rocky_size) return COLORS.grey;
-            // Must have comfortable gravity (Step 4)
-            const g = p.pl_g_rel;
-            if (g == null || g < 0.5 || g > 1.5) return COLORS.grey;
-            // Must be in habitable zone (Step 5)
-            const s = p.pl_insol_merged;
-            if (s == null || s < 0.32 || s > 1.78) return COLORS.grey;
-            return COLORS.habitable;  // Meets all criteria
+          // Must be rocky (Step 3)
+          if (!p.pl_is_rocky_size) return COLORS.grey;
+          // Must have comfortable gravity (Step 4)
+          const g = p.pl_g_rel;
+          if (g == null || g < 0.5 || g > 1.5) return COLORS.grey;
+          // Must be in habitable zone (Step 5)
+          const s = p.pl_insol_merged;
+          if (s == null || s < 0.32 || s > 1.78) return COLORS.grey;
+          return COLORS.habitable;  // Meets all criteria
         },
         opacity: (p) => {
-            if (!p.pl_is_rocky_size) return 0.2;
-            const g = p.pl_g_rel;
-            if (g == null || g < 0.5 || g > 1.5) return 0.2;
-            const s = p.pl_insol_merged;
-            if (s != null && s >= 0.32 && s <= 1.78) return 0.9;
-            return 0.2;
+          if (!p.pl_is_rocky_size) return 0.2;
+          const g = p.pl_g_rel;
+          if (g == null || g < 0.5 || g > 1.5) return 0.2;
+          const s = p.pl_insol_merged;
+          if (s != null && s >= 0.32 && s <= 1.78) return 0.9;
+          return 0.2;
         }
       }
     },
@@ -317,12 +343,16 @@ export const scenes = [
         {
           from: "guide",
           text: "Left is frozen, right is scorched; up and down is gravity. Green dots in the central band are rocky planets with Earth-like light and human-friendly gravity."
+        },
+        {
+          from: "guide",
+          text: "If you are curious: insolation compares how much star energy hits the planet to Earth. A simple estimate is S_rel ≈ (L_star / L_sun) / (distance / 1 AU)²."
         }
       ],
-      diagramHint: "Blue–green–orange x-axis, horizontal ‘gravity ok’ band, green rectangle in the middle.",
+      diagramHint: "Blue–green–orange x-axis, horizontal gravity ok band, green rectangle in the middle.",
       notes: [
-        "Optimistic candidates ≈ planets that are rocky, in the HZ and in the gravity band.",
-        "Others fade into the background."
+        "Green dots are planets that are rocky, in the habitable light zone and in the comfortable gravity band.",
+        "Other planets remain in the background as grey context."
       ],
       legend: {
         sections: [
@@ -405,13 +435,17 @@ export const scenes = [
         { from: "user", text: "After all those filters, what’s left?" },
         {
           from: "guide",
-          text: "Faint grey stars are systems we filtered out. Coloured ones host at least one promising planet. Colour now encodes star type: red M-dwarfs, orange K-stars, yellow G-stars like the Sun, pale blue F-stars."
+          text:
+            "Each coloured star hosts at least one promising planet. The colour now shows star type: red M-dwarfs, orange K-stars, yellow G-stars like the Sun, pale blue F-stars."
         }
       ],
-      diagramHint: "One coloured star with orbits, legend of star colours (M/K/G/F).",
+      diagramHint:
+        "One coloured star with several candidate planets drawn around it, plus a legend of star colours (M/K/G/F).",
       notes: [
-        "Orbits and candidate planets can be drawn around these systems.",
-        "These are the systems feeding the small-multiples view."
+        "Only systems with at least one candidate planet are highlighted; other systems fade into the background.",
+        "Larger coloured stars represent systems with more candidate planets.",
+        "These are the systems that will each become a card in the final small-multiples view.",
+        "Colour encodes star type, from cool red M-dwarfs to hotter pale blue F-stars."
       ],
       legend: {
         sections: [
@@ -450,15 +484,23 @@ export const scenes = [
     sidebarContent: {
       heading: "Meet each candidate system",
       chat: [
-        { from: "user", text: "Can we see more details on these systems?" },
+        {
+          from: "user",
+          text: "Can we see more details on these systems?"
+        },
         {
           from: "guide",
-          text: "Yes. Each coloured star will become a card with orbit, distance, star type and key numbers. Let’s switch to the detailed view."
+          text:
+            "Yes. Each coloured star now turns into a card. In each card, the central star slowly morphs into our Sun and back, the orbits compare Earth’s year to the candidate planet’s year, and pulsing rings inside the planets show how strong gravity feels there compared to Earth. Let’s switch to this detailed view."
         }
       ],
-      diagramHint: "Galaxy dots morphing into a grid of cards.",
+      diagramHint:
+        "Galaxy dots fading into a grid of cards. One card is enlarged, showing a star ↔ Sun morph, two orbits (Earth and the candidate planet) and pulsing rings for gravity.",
       notes: [
-        "When this scene is active, you can fade in the small-multiples grid and fade out the galaxy."
+        "When this scene is active, the galaxy view can fade into the background while the small-multiples grid appears.",
+        "Inside each card: the star morphs between the system’s star and our Sun, so you can compare colour and size.",
+        "Two orbits are shown: one for Earth and one for the conservative candidate planet, with orbital speed based on their periods.",
+        "Pulsing rings inside Earth and the candidate planet encode surface gravity relative to Earth."
       ]
     }
   }
