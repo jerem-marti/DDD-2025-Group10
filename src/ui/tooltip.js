@@ -183,7 +183,7 @@ export function formatSystemTooltip(system, sceneId = null) {
       lines.push(`<span style="color: #4ade80">★ ${conserv} conservative</span>`);
     }
     if (optimOnly > 0) {
-      lines.push(`<span style="color: #22d3ee">★ ${optimOnly} optimistic only</span>`);
+      lines.push(`<span style="color: #ec4899">★ ${optimOnly} optimistic only</span>`);
     }
   }
   
