@@ -358,20 +358,32 @@ export const scenes = [
     sidebarContent: {
       heading: "Step 5 · Combining light and gravity",
       chat: [
-        { from: "user", text: "Where do Earth-like conditions appear?" },
+        { from: "user", 
+          text: "And what about temperature?" },
         {
           from: "guide",
-          text: "Left is frozen, right is scorched; up and down is gravity. Green dots in the central band are rocky planets with Earth-like light and human-friendly gravity."
+          text: "We don’t measure temperature directly. Instead, we use stellar flux, which is the amount of energy a planet receives from its star. In this new chart, the green area shows the survivable stellar-flux range."
+        },
+        {
+          from: "user",
+          text: "So does this mean all planets in the green area are habitable?"
         },
         {
           from: "guide",
-          text: "If you are curious: insolation compares how much star energy hits the planet to Earth. A simple estimate is S_rel ≈ (L_star / L_sun) / (distance / 1 AU)²."
+          text: "No. We also need to keep considering gravity shown on the orange area. Planets are truly habitable only where the green and orange regions overlap."
+        },
+        {
+          from: "user",
+          text: "What are the green planets?"
+        },
+        {
+          from: "guide",
+          text: "They are planets that could potentially be made of solid rocky material, as identified in step 3."
         }
       ],
       diagramHint: "Blue–green–orange x-axis, horizontal gravity ok band, green rectangle in the middle.",
       notes: [
-        "Green dots are planets that are rocky, in the habitable light zone and in the comfortable gravity band.",
-        "Other planets remain in the background as grey context."
+        "Since stellar flux is only an estimate, we show both an optimistic and a conservative scenario. The lighter green area represents this uncertainty range."
       ],
       legend: {
         sections: [
@@ -451,20 +463,18 @@ export const scenes = [
     sidebarContent: {
       heading: "Step 6 · Our short list of systems",
       chat: [
-        { from: "user", text: "After all those filters, what’s left?" },
+        { from: "user", 
+          text: "After all those filters, what’s left in the galaxy?" 
+        },
         {
           from: "guide",
-          text:
-            "Each coloured star hosts at least one promising planet. The colour now shows star type: red M-dwarfs, orange K-stars, yellow G-stars like the Sun, pale blue F-stars."
+          text: "These are all the systems that contain at least one potentially habitable exoplanet. All other systems are no longer highlighted."
         }
       ],
       diagramHint:
-        "One coloured star with several candidate planets drawn around it, plus a legend of star colours (M/K/G/F).",
+        "Did you know? M-type stars are the most common stars in the Milky Way, making up about 70% of all stars.",
       notes: [
-        "Only systems with at least one candidate planet are highlighted; other systems fade into the background.",
-        "Larger coloured stars represent systems with more candidate planets.",
-        "These are the systems that will each become a card in the final small-multiples view.",
-        "Colour encodes star type, from cool red M-dwarfs to hotter pale blue F-stars."
+        "Larger coloured stars represent systems with more candidate planets."
       ],
       legend: {
         sections: [
@@ -503,21 +513,29 @@ export const scenes = [
       chat: [
         {
           from: "user",
-          text: "Can we see more details on these systems?"
+          text: "What am I seeing right now?"
         },
         {
           from: "guide",
-          text:
-            "Yes. Each coloured star now turns into a card. In each card, the central star slowly morphs into our Sun and back, the orbits compare Earth’s year to the candidate planet’s year, and pulsing rings inside the planets show how strong gravity feels there compared to Earth. Let’s switch to this detailed view."
+          text: "You’re looking at all the systems that contain conservative potentially habitable planets, shown in green."
+        },
+        {
+          from: "user",
+          text: "What is the purple planet?"
+        },
+        {
+          from: "guide",
+          text: "The purple planet represents Earth, so you can compare it with the exoplanets. You can see differences in orbital speed and gravity through the concentric movements inside each planet."
+        },
+        {
+          from: "guide",
+          text: "Which planet would you move to?"
         }
       ],
       diagramHint:
-        "Galaxy dots fading into a grid of cards. One card is enlarged, showing a star ↔ Sun morph, two orbits (Earth and the candidate planet) and pulsing rings for gravity.",
+        "Did you know? One parsec is 3.26 light-years. Even at the speed of light, it would take 3.26 years to travel a single parsec.",
       notes: [
-        "When this scene is active, the galaxy view can fade into the background while the small-multiples grid appears.",
-        "Inside each card: the star morphs between the system’s star and our Sun, so you can compare colour and size.",
-        "Two orbits are shown: one for Earth and one for the conservative candidate planet, with orbital speed based on their periods.",
-        "Pulsing rings inside Earth and the candidate planet encode surface gravity relative to Earth."
+        "At the center of each system, the Sun morphs into that system’s star(s). Here you can see their temperature, size, and number of stars."
       ]
     }
   }
