@@ -473,7 +473,7 @@ export function initGalaxyView(canvas, tooltip = null) {
       if (planet.pl_is_conservative_candidate) {
         planetColor = "#4ade80"; // green for conservative candidate
       } else if (planet.pl_is_optimistic_candidate) {
-        planetColor = "#22d3ee"; // cyan for optimistic candidate
+        planetColor = "#ec4899"; // pink for optimistic candidate
       }
 
       // Draw planet

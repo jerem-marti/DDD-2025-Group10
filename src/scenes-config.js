@@ -343,7 +343,10 @@ export const scenes = [
           // Must be in habitable zone (Step 5)
           const s = p.pl_insol_merged;
           if (s == null || s < 0.32 || s > 1.78) return COLORS.grey;
-          return COLORS.habitable;  // Meets all criteria
+          // In conservative zone (0.35-1.04): green
+          if (s >= 0.35 && s <= 1.04) return COLORS.habitable;
+          // In optimistic only (0.32-0.35 or 1.04-1.78): pink
+          return "#ec4899";
         },
         opacity: (p) => {
           if (!p.pl_is_rocky_size) return 0.2;
@@ -362,7 +365,7 @@ export const scenes = [
           text: "And what about temperature?" },
         {
           from: "guide",
-          text: "We don’t measure temperature directly. Instead, we use stellar flux, which is the amount of energy a planet receives from its star. In this new chart, the green area shows the survivable stellar-flux range."
+          text: "We don't measure temperature directly. Instead, we use stellar flux, which is the amount of energy a planet receives from its star. In this new chart, the green area shows the conservative survivable range, while the pink areas show the wider optimistic range."
         },
         {
           from: "user",
@@ -370,34 +373,36 @@ export const scenes = [
         },
         {
           from: "guide",
-          text: "No. We also need to keep considering gravity shown on the orange area. Planets are truly habitable only where the green and orange regions overlap."
+          text: "No. We also need to keep considering gravity shown on the orange area. Planets are truly habitable only where the stellar flux zones (green or pink) and orange gravity region overlap."
         },
         {
           from: "user",
-          text: "What are the green planets?"
+          text: "What are the green and pink dots?"
         },
         {
           from: "guide",
-          text: "They are planets that could potentially be made of solid rocky material, as identified in step 3."
+          text: "These are rocky planets with comfortable gravity that also fall within the habitable light zones. Green dots are in the conservative zone (most likely habitable), while pink dots are in the optimistic-only zone (potentially habitable but with more uncertainty)."
         }
       ],
-      diagramHint: "Blue–green–orange x-axis, horizontal gravity ok band, green rectangle in the middle.",
+      diagramHint: "Stellar flux on x-axis from cold (left) to hot (right). Pink vertical bands on left and right edges show optimistic habitable zone. Darker green vertical band in middle shows conservative habitable zone. Orange horizontal band shows OK gravity range. Green and pink dots appear where zones overlap.",
       notes: [
-        "Since stellar flux is only an estimate, we show both an optimistic and a conservative scenario. The lighter green area represents this uncertainty range."
+        "Since stellar flux is only an estimate, we show both an optimistic and a conservative scenario. The lighter pink area shows the optimistic range, while the darker green area shows the conservative range."
       ],
       legend: {
         sections: [
           {
             title: "Dot",
             items: [
-              { type: "color", color: COLORS.habitable, label: "Rocky + Habitable light + Comfortable gravity" },
+              { type: "color", color: COLORS.habitable, label: "Rocky + Conservative zone + Comfortable gravity" },
+              { type: "color", color: "#ec4899", label: "Rocky + Optimistic zone only + Comfortable gravity" },
               { type: "color", color: COLORS.grey, label: "Other planet" }
             ]
           },
           {
             title: "Area",
             items: [
-              { type: "area", color: COLORS.habitable, label: "Habitable light zone (0.32–1.78 S⊕)" },
+              { type: "area", color: "#ec4899", label: "Optimistic habitable light zone (0.32–1.78 S⊕)" },
+              { type: "area", color: COLORS.habitable, label: "Conservative habitable light zone (0.35–1.04 S⊕)" },
               { type: "area", color: "#facc15", label: "Comfortable gravity zone (0.5–1.5 g)" }
             ]
           }
@@ -489,7 +494,7 @@ export const scenes = [
             title: "Planet",
             items: [
               { type: "color", color: "#4ade80", label: "● Conservative candidate" },
-              { type: "color", color: "#22d3ee", label: "● Optimistic candidate" }
+              { type: "color", color: "#ec4899", label: "● Optimistic candidate" }
             ]
           }
         ]

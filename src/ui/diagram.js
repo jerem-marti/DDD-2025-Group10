@@ -188,19 +188,26 @@ function generateHabitableZoneDiagram() {
       <line x1="30" y1="110" x2="180" y2="110" stroke="#555" stroke-width="1"/>
       <line x1="30" y1="110" x2="30" y2="30" stroke="#555" stroke-width="1"/>
       
-      <!-- Habitable zone (green vertical band) -->
-      <rect x="75" y="30" width="60" height="80" fill="#4ade80" opacity="0.15"/>
+      <!-- Optimistic habitable zone (pink - full width) -->
+      <rect x="60" y="30" width="90" height="80" fill="#ec4899" opacity="0.12"/>
+      
+      <!-- Conservative habitable zone (green - middle) -->
+      <rect x="80" y="30" width="50" height="80" fill="#4ade80" opacity="0.2"/>
       
       <!-- Gravity band (orange horizontal band) -->
       <rect x="30" y="60" width="150" height="30" fill="#fb923c" opacity="0.15"/>
       
-      <!-- Sweet spot (overlap) -->
-      <rect x="75" y="60" width="60" height="30" fill="#4ade80" opacity="0.25"/>
+      <!-- Optimistic sweet spots (pink overlap) -->
+      <rect x="60" y="60" width="20" height="30" fill="#ec4899" opacity="0.25"/>
+      <rect x="130" y="60" width="20" height="30" fill="#ec4899" opacity="0.25"/>
+      
+      <!-- Conservative sweet spot (green overlap) -->
+      <rect x="80" y="60" width="50" height="30" fill="#4ade80" opacity="0.3"/>
       
       <!-- Zone labels -->
-      <text x="60" y="70" text-anchor="end" font-size="9" fill="#60a5fa">Too Cold</text>
+      <text x="45" y="70" text-anchor="middle" font-size="9" fill="#60a5fa">Too Cold</text>
       <text x="105" y="50" text-anchor="middle" font-size="9" fill="#4ade80" font-weight="500">Habitable</text>
-      <text x="150" y="70" text-anchor="start" font-size="9" fill="#fb923c">Too Hot</text>
+      <text x="165" y="70" text-anchor="middle" font-size="9" fill="#fb923c">Too Hot</text>
       
       <!-- Gravity labels -->
       <text x="185" y="50" font-size="8" fill="#888">High g</text>
@@ -211,8 +218,10 @@ function generateHabitableZoneDiagram() {
       <text x="105" y="130" text-anchor="middle" font-size="9" fill="#999">Stellar Flux</text>
       <text x="15" y="70" text-anchor="middle" font-size="9" fill="#999" transform="rotate(-90, 15, 70)">Gravity</text>
       
-      <!-- Green dot in sweet spot -->
+      <!-- Dots: green in conservative zone, pink in optimistic-only zones -->
       <circle cx="105" cy="75" r="3" fill="#4ade80"/>
+      <circle cx="70" cy="75" r="2.5" fill="#ec4899"/>
+      <circle cx="140" cy="75" r="2.5" fill="#ec4899"/>
     </svg>
   `;
 }
@@ -244,10 +253,10 @@ function generateCandidateSystemDiagram() {
       <circle cx="130" cy="100" r="4" fill="#4ade80" opacity="0.6"/>
       <text x="130" y="92" text-anchor="middle" font-size="8" fill="#4ade80">P</text>
       
-      <!-- Optimistic candidate (cyan) -->
-      <circle cx="155" cy="85" r="5" fill="none" stroke="#22d3ee" stroke-width="1.5"/>
-      <circle cx="155" cy="85" r="3" fill="#22d3ee" opacity="0.5"/>
-      <text x="155" y="77" text-anchor="middle" font-size="8" fill="#22d3ee">P</text>
+      <!-- Optimistic candidate (pink) -->
+      <circle cx="155" cy="85" r="5" fill="none" stroke="#ec4899" stroke-width="1.5"/>
+      <circle cx="155" cy="85" r="3" fill="#ec4899" opacity="0.5"/>
+      <text x="155" y="77" text-anchor="middle" font-size="8" fill="#ec4899">P</text>
       
       <!-- Title -->
       <text x="100" y="18" text-anchor="middle" font-size="11" fill="#ccc" font-weight="500">Candidate Star System</text>
@@ -257,7 +266,7 @@ function generateCandidateSystemDiagram() {
         <circle cx="0" cy="0" r="3" fill="#ff9f4a"/>
         <text x="8" y="3" font-size="8" fill="#999">K-type star</text>
         
-        <circle cx="60" cy="0" r="3" fill="#22d3ee"/>
+        <circle cx="60" cy="0" r="3" fill="#ec4899"/>
         <text x="68" y="3" font-size="8" fill="#999">Optimistic</text>
         
         <circle cx="115" cy="0" r="3" fill="#4ade80"/>

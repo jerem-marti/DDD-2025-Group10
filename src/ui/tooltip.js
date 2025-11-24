@@ -137,7 +137,7 @@ export function formatPlanetTooltip(planet) {
   if (planet.pl_is_conservative_candidate) {
     lines.push(`<span style="color: #4ade80">★ Conservative candidate</span>`);
   } else if (planet.pl_is_optimistic_candidate) {
-    lines.push(`<span style="color: #22d3ee">★ Optimistic candidate</span>`);
+    lines.push(`<span style="color: #ec4899">★ Optimistic candidate</span>`);
   }
   
   return lines.join('<br>');
