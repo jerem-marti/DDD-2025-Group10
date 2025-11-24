@@ -268,6 +268,17 @@ export function initSmallMultiplesView(containerEl) {
       earthGroup.appendChild(gravityCircle);
     }
     
+    // Add Earth label
+    const earthLabel = document.createElementNS(NS, 'text');
+    earthLabel.setAttribute('x', earthRadius + 4);
+    earthLabel.setAttribute('y', '0');
+    earthLabel.setAttribute('fill', '#a855f7');
+    earthLabel.setAttribute('font-size', '8');
+    earthLabel.setAttribute('font-family', 'system-ui, sans-serif');
+    earthLabel.setAttribute('dominant-baseline', 'middle');
+    earthLabel.textContent = '⊕';
+    earthGroup.appendChild(earthLabel);
+    
     const earth = earthGroup;
     
     // Animate Earth along shared orbit
@@ -297,17 +308,17 @@ export function initSmallMultiplesView(containerEl) {
     
     const candidateStop1 = document.createElementNS(NS, 'stop');
     candidateStop1.setAttribute('offset', '0%');
-    candidateStop1.setAttribute('stop-color', '#22d3ee');
+    candidateStop1.setAttribute('stop-color', '#4ade80');
     candidateStop1.setAttribute('stop-opacity', '0.8');
     
     const candidateStop2 = document.createElementNS(NS, 'stop');
     candidateStop2.setAttribute('offset', '50%');
-    candidateStop2.setAttribute('stop-color', '#22d3ee');
+    candidateStop2.setAttribute('stop-color', '#4ade80');
     candidateStop2.setAttribute('stop-opacity', '0.4');
     
     const candidateStop3 = document.createElementNS(NS, 'stop');
     candidateStop3.setAttribute('offset', '100%');
-    candidateStop3.setAttribute('stop-color', '#22d3ee');
+    candidateStop3.setAttribute('stop-color', '#4ade80');
     candidateStop3.setAttribute('stop-opacity', '0');
     
     candidateGradient.appendChild(candidateStop1);
@@ -323,7 +334,7 @@ export function initSmallMultiplesView(containerEl) {
     const candidateOutline = document.createElementNS(NS, 'circle');
     candidateOutline.setAttribute('r', candidateRadius);
     candidateOutline.setAttribute('fill', 'none');
-    candidateOutline.setAttribute('stroke', '#06b6d4');
+    candidateOutline.setAttribute('stroke', '#4ade80');
     candidateOutline.setAttribute('stroke-width', '1');
     candidateGroup.appendChild(candidateOutline);
     
@@ -333,7 +344,7 @@ export function initSmallMultiplesView(containerEl) {
       gravityCircle.setAttribute('class', 'gravity-pattern');
       gravityCircle.setAttribute('r', '0');
       gravityCircle.setAttribute('fill', 'none');
-      gravityCircle.setAttribute('stroke', '#06b6d4');
+      gravityCircle.setAttribute('stroke', '#4ade80');
       gravityCircle.setAttribute('stroke-width', '0.75');
       
       // Animate radius from planet edge to center
@@ -358,6 +369,17 @@ export function initSmallMultiplesView(containerEl) {
       
       candidateGroup.appendChild(gravityCircle);
     }
+    
+    // Add candidate planet label
+    const candidateLabel = document.createElementNS(NS, 'text');
+    candidateLabel.setAttribute('x', candidateRadius + 4);
+    candidateLabel.setAttribute('y', '0');
+    candidateLabel.setAttribute('fill', '#4ade80');
+    candidateLabel.setAttribute('font-size', '8');
+    candidateLabel.setAttribute('font-family', 'system-ui, sans-serif');
+    candidateLabel.setAttribute('dominant-baseline', 'middle');
+    candidateLabel.textContent = 'P';
+    candidateGroup.appendChild(candidateLabel);
     
     const candidatePlanet = candidateGroup;
     

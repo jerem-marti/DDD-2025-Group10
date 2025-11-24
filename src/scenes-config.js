@@ -472,9 +472,7 @@ export const scenes = [
             title: "Star",
             items: [
               { type: "color", color: COLORS.starM, label: "M – cool red dwarf" },
-              { type: "color", color: COLORS.starK, label: "K – orange star" },
-              { type: "color", color: COLORS.starG, label: "G – Sun-like (yellow)" },
-              { type: "color", color: COLORS.starF, label: "F – hotter (pale blue)" }
+              { type: "color", color: COLORS.starK, label: "K – orange star" }
             ]
           },
           {
