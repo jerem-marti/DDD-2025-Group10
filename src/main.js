@@ -75,7 +75,7 @@ async function init() {
       document.body.classList.add("show-small-multiples");
     }
 
-    sidebar.update(scene.sidebarContent);
+    sidebar.update(scene.sidebarContent, scene.id);
   };
 
   subscribe(updateScene);

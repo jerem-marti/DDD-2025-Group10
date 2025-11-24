@@ -1,4 +1,5 @@
 // src/ui/sidebar.js
+import { renderDiagram } from './diagram.js';
 
 /**
  * Initialize the sidebar UI.
@@ -74,7 +75,7 @@ export function initSidebar({ headingEl, chatEl, notesEl, diagramEl, legendEl })
     });
   }
 
-  function update(sidebarContent) {
+  function update(sidebarContent, sceneId = null) {
     const { heading, chat, notes, diagramHint, legend } = sidebarContent;
 
     headingEl.textContent = heading || "";
@@ -96,7 +97,13 @@ export function initSidebar({ headingEl, chatEl, notesEl, diagramEl, legendEl })
       notesEl.appendChild(li);
     });
 
-    diagramEl.textContent = diagramHint || "";
+    // Render diagram if scene ID is provided, otherwise show diagram hint
+    if (sceneId) {
+      renderDiagram(diagramEl, sceneId);
+    } else {
+      diagramEl.textContent = diagramHint || "";
+      diagramEl.classList.remove('diagram-container');
+    }
 
     // Legend
     renderLegend(legend);
