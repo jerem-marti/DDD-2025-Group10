@@ -232,7 +232,7 @@ export function initSmallMultiplesView(containerEl) {
     const earthOutline = document.createElementNS(NS, 'circle');
     earthOutline.setAttribute('r', earthRadius);
     earthOutline.setAttribute('fill', 'none');
-    earthOutline.setAttribute('stroke', '#22c55e');
+    earthOutline.setAttribute('stroke', '#a855f7');
     earthOutline.setAttribute('stroke-width', '1');
     earthGroup.appendChild(earthOutline);
     
@@ -242,7 +242,7 @@ export function initSmallMultiplesView(containerEl) {
       gravityCircle.setAttribute('class', 'gravity-pattern');
       gravityCircle.setAttribute('r', '0');
       gravityCircle.setAttribute('fill', 'none');
-      gravityCircle.setAttribute('stroke', '#22c55e');
+      gravityCircle.setAttribute('stroke', '#a855f7');
       gravityCircle.setAttribute('stroke-width', '0.75');
       
       // Animate radius from planet edge to center

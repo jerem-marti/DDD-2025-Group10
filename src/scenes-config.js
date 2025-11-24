@@ -40,7 +40,7 @@ export const scenes = [
         return r * Math.sin(angle);
       },
       encodings: {
-        baseColor: "#dddddd",
+        baseColor: "#ffd93d",
         baseOpacity: (d) => {
           const dist = d.sy_dist || 10;
           return Math.max(0.15, 1 - Math.log10(dist + 1) * 0.25);
@@ -219,6 +219,7 @@ export const scenes = [
         y: { outlierMethod: "percentile" }
       },
       encodings: {
+        rockyWindow: { minR: 0.5, maxR: 1.6 },
         baseColor: () => COLORS.grey,
         baseOpacity: () => 0.2,
         baseSize: () => 2.5,
@@ -276,6 +277,7 @@ export const scenes = [
           {
             title: "Area",
             items: [
+              { type: "area", color: COLORS.rocky, label: "Rocky size zone (0.5–1.6 R⊕)" },
               { type: "area", color: COLORS.gravity, label: "Comfortable gravity zone (0.5–1.5 g)" }
             ]
           }

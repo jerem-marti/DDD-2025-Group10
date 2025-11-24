@@ -118,7 +118,7 @@ export function formatPlanetTooltip(planet) {
   }
   
   if (planet.pl_g_rel != null) {
-    lines.push(`Gravity: ${planet.pl_g_rel.toFixed(2)} g`);
+    lines.push(`Gravity: ${planet.pl_g_rel.toFixed(2)} g⊕`);
   }
   
   if (planet.pl_insol_merged != null) {

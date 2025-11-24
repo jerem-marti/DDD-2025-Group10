@@ -41,6 +41,9 @@ export function initScatterView(svgEl, tooltip = null) {
   // Background layers (bands, zones, iso-lines)
   const bgG = g.append("g").attr("class", "background-layers");
   
+  // Earth reference point layer (after background, before data points)
+  const earthG = g.append("g").attr("class", "earth-reference");
+  
   const xAxisG = g.append("g").attr("transform", `translate(0,${innerHeight})`);
   const yAxisG = g.append("g");
   const xLabelG = g.append("text")
@@ -76,8 +79,14 @@ export function initScatterView(svgEl, tooltip = null) {
   
   // Setup zoom behavior
   function setupZoom() {
+    // Calculate zoom extent based on window size
+    // Larger windows get more zoom range
+    const baseZoom = 20;
+    const sizeMultiplier = Math.max(1, Math.min(innerWidth, innerHeight) / 400);
+    const maxZoom = baseZoom * sizeMultiplier;
+    
     zoomBehavior = d3.zoom()
-      .scaleExtent([1, 20])
+      .scaleExtent([1, maxZoom])
       .on("zoom", (event) => {
         currentZoom = event.transform;
         
@@ -86,8 +95,24 @@ export function initScatterView(svgEl, tooltip = null) {
         const newYScale = currentZoom.rescaleY(yScaleOriginal);
         
         // Update axes with proper formatting
+        // Adaptive tick counts based on zoom level
+        const zoomScale = currentZoom.k;
+        
+        // Start with more ticks when zoomed out, reduce as we zoom in
+        let xTickCount = 3;
+        let yTickCount = 4;
+        
+        if (zoomScale > 2) {
+          xTickCount = 2;
+          yTickCount = 3;
+        }
+        if (zoomScale > 5) {
+          xTickCount = 2;
+          yTickCount = 2;
+        }
+        
         const xAxis = d3.axisBottom(newXScale)
-          .ticks(8)
+          .ticks(xTickCount)
           .tickFormat(d => {
             if (d >= 1000) return d3.format(".2s")(d);
             if (d >= 10) return d3.format(".0f")(d);
@@ -96,7 +121,7 @@ export function initScatterView(svgEl, tooltip = null) {
           });
         
         const yAxis = d3.axisLeft(newYScale)
-          .ticks(8)
+          .ticks(yTickCount)
           .tickFormat(d => {
             if (d >= 1000) return d3.format(".2s")(d);
             if (d >= 10) return d3.format(".0f")(d);
@@ -114,6 +139,9 @@ export function initScatterView(svgEl, tooltip = null) {
         
         // Update background layers
         updateBackgroundLayers(newXScale, newYScale);
+        
+        // Update Earth reference point
+        drawEarthReference(currentView, newXScale, newYScale);
       });
     
     svg.call(zoomBehavior);
@@ -221,6 +249,111 @@ export function initScatterView(svgEl, tooltip = null) {
   }
 
   /**
+   * Draw Earth reference point with connecting lines to axes
+   */
+  function drawEarthReference(view, xScale, yScale) {
+    earthG.selectAll("*").remove();
+    
+    // Define Earth's values for different plot types
+    const earthValues = {
+      pl_rade: 1.0,        // Earth radius = 1 R⊕
+      pl_bmasse: 1.0,      // Earth mass = 1 M⊕
+      pl_g_rel: 1.0,       // Earth gravity = 1 g
+      pl_insol_merged: 1.0 // Earth insolation = 1 S⊕
+    };
+    
+    const { xVar, yVar } = view;
+    
+    // Check if Earth should be shown (only if both axes have Earth values defined)
+    if (!earthValues[xVar] || !earthValues[yVar]) return;
+    
+    const earthX = earthValues[xVar];
+    const earthY = earthValues[yVar];
+    
+    // Check if Earth is within the domain
+    const xDomain = xScale.domain();
+    const yDomain = yScale.domain();
+    
+    if (earthX < xDomain[0] || earthX > xDomain[1] || 
+        earthY < yDomain[0] || earthY > yDomain[1]) {
+      return; // Earth is outside the visible range
+    }
+    
+    const earthPx = xScale(earthX);
+    const earthPy = yScale(earthY);
+    
+    // Draw connecting lines to axes (dashed, subtle)
+    earthG.append("line")
+      .attr("class", "earth-line-x")
+      .attr("x1", earthPx)
+      .attr("y1", earthPy)
+      .attr("x2", earthPx)
+      .attr("y2", innerHeight)
+      .style("stroke", "#a855f7")
+      .style("stroke-width", 1.5)
+      .style("stroke-dasharray", "4,4")
+      .style("opacity", 0.4);
+    
+    earthG.append("line")
+      .attr("class", "earth-line-y")
+      .attr("x1", earthPx)
+      .attr("y1", earthPy)
+      .attr("x2", 0)
+      .attr("y2", earthPy)
+      .style("stroke", "#a855f7")
+      .style("stroke-width", 1.5)
+      .style("stroke-dasharray", "4,4")
+      .style("opacity", 0.4);
+    
+    // Draw Earth marker (special symbol)
+    const earthGroup = earthG.append("g")
+      .attr("class", "earth-marker")
+      .attr("transform", `translate(${earthPx},${earthPy})`);
+    
+    // Outer glow circle
+    earthGroup.append("circle")
+      .attr("r", 10)
+      .style("fill", "#a855f7")
+      .style("opacity", 0.2);
+    
+    // Inner filled circle
+    earthGroup.append("circle")
+      .attr("r", 6)
+      .style("fill", "#a855f7")
+      .style("stroke", "#581c87")
+      .style("stroke-width", 2)
+      .style("opacity", 0.9);
+    
+    // Earth symbol "⊕" or "🜨"
+    earthGroup.append("text")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .attr("font-size", "10px")
+      .attr("font-weight", "bold")
+      .style("fill", "#fff")
+      .style("pointer-events", "none")
+      .text("⊕");
+    
+    // Label
+    earthGroup.append("text")
+      .attr("class", "earth-label")
+      .attr("x", 0)
+      .attr("y", -15)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "11px")
+      .attr("font-weight", "bold")
+      .style("fill", "#a855f7")
+      .style("stroke", "#0c1521")
+      .style("stroke-width", 3)
+      .style("paint-order", "stroke")
+      .style("pointer-events", "none")
+      .text("Earth");
+    
+    // Raise Earth marker above all data points
+    earthG.raise();
+  }
+
+  /**
    * Draw background elements (bands, zones, reference lines)
    */
   function drawBackground(view, xScale, yScale) {
@@ -280,7 +413,7 @@ export function initScatterView(svgEl, tooltip = null) {
         .attr("y", yScale(max))
         .attr("width", innerWidth)
         .attr("height", yScale(min) - yScale(max))
-        .style("fill", "#facc15")
+        .style("fill", "#fb923c")
         .style("opacity", 0.15);
     }
 
@@ -377,7 +510,7 @@ export function initScatterView(svgEl, tooltip = null) {
           .attr("y", clampedTop)
           .attr("width", innerWidth)
           .attr("height", height)
-          .style("fill", "#facc15")
+          .style("fill", "#fb923c")
           .style("opacity", 0.15);
       }
     }
@@ -427,6 +560,14 @@ export function initScatterView(svgEl, tooltip = null) {
     xAxisG.attr("transform", `translate(0,${innerHeight})`);
     xLabelG.attr("x", innerWidth / 2).attr("y", innerHeight + 40);
     yLabelG.attr("x", -innerHeight / 2);
+    
+    // Update zoom extent based on new dimensions
+    if (zoomBehavior) {
+      const baseZoom = 20;
+      const sizeMultiplier = Math.max(1, Math.min(innerWidth, innerHeight) / 400);
+      const maxZoom = baseZoom * sizeMultiplier;
+      zoomBehavior.scaleExtent([1, maxZoom]);
+    }
 
     const { xVar, yVar, xLabel, yLabel, encodings, scaleConfig = {} } = view;
     const { color, opacity, size } = encodings || {};
@@ -462,9 +603,9 @@ export function initScatterView(svgEl, tooltip = null) {
     // Draw background elements
     drawBackground(view, xScale, yScale);
 
-    // Update axes with better formatting
+    // Update axes with better formatting and reduced tick count to prevent overlap
     const xAxis = d3.axisBottom(xScale)
-      .ticks(8)
+      .ticks(3)  // Reduced to 3 for X-axis to prevent horizontal overlap
       .tickFormat(d => {
         if (d >= 1000) return d3.format(".2s")(d);
         if (d >= 10) return d3.format(".0f")(d);
@@ -473,7 +614,7 @@ export function initScatterView(svgEl, tooltip = null) {
       });
     
     const yAxis = d3.axisLeft(yScale)
-      .ticks(8)
+      .ticks(4)  // Keep 4 for Y-axis (vertical has more space)
       .tickFormat(d => {
         if (d >= 1000) return d3.format(".2s")(d);
         if (d >= 10) return d3.format(".0f")(d);
@@ -584,6 +725,9 @@ export function initScatterView(svgEl, tooltip = null) {
       .duration(200)
       .attr("r", 0)
       .remove();
+    
+    // Draw Earth reference point after data points to ensure it's on top
+    drawEarthReference(view, xScale, yScale);
   }
 
   return {
