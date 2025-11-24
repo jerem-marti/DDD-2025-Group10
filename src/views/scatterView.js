@@ -477,7 +477,7 @@ export function initScatterView(svgEl, tooltip = null) {
           .attr("y", 0)
           .attr("width", xScl(optimistic.max) - xScl(optimistic.min))
           .attr("height", innerHeight)
-          .style("fill", "#4ade80")
+          .style("fill", "#ec4899")
           .style("opacity", 0.06);
       }
       if (conservative) {
