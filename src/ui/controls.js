@@ -19,7 +19,24 @@ export function initControls({ prevButton, nextButton, onPrev, onNext }) {
     onNext();
   });
 
+  function updateButtons(currentIndex, totalScenes) {
+    // Hide Previous button on first page
+    if (currentIndex === 0) {
+      prevButton.style.display = 'none';
+    } else {
+      prevButton.style.display = '';
+    }
+
+    // Hide Next button on last page
+    if (currentIndex === totalScenes - 1) {
+      nextButton.style.display = 'none';
+    } else {
+      nextButton.style.display = '';
+    }
+  }
+
   return {
+    updateButtons,
     destroy() {
       // Optional: remove listeners if you need
       prevButton.replaceWith(prevButton.cloneNode(true));

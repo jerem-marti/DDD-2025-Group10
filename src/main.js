@@ -41,7 +41,7 @@ async function init() {
     legendEl: sidebarLegend
   });
 
-  initControls({
+  const controls = initControls({
     prevButton: prevBtn,
     nextButton: nextBtn,
     onPrev: () => goToScene(state.currentSceneIndex - 1),
@@ -76,6 +76,9 @@ async function init() {
     }
 
     sidebar.update(scene.sidebarContent, scene.id);
+    
+    // Update button visibility based on current scene
+    controls.updateButtons(state.currentSceneIndex, state.scenes.length);
   };
 
   subscribe(updateScene);
