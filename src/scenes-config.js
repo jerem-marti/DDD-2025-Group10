@@ -56,14 +56,22 @@ export const scenes = [
       chat: [
         {
           from: "user",
-          text: "What are all these dots?"
+          text: "What is this?"
         },
         {
           from: "guide",
-          text: "Each dot is a star system with at least one exoplanet. The angle shows its direction in the Galaxy; distance from the center grows with how far it is from us."
+          text: "This is a visualization of all the star systems in our galaxy. Our system, the Solar system, is in the center and each dot is a star system with at least one exoplanet."
+        },
+        {
+          from: "user",
+          text: "How are these systems positioned?"
+        },
+        {
+          from: "guide",
+          text: "The angle shows the system's direction in our Galaxy and the distance from the center grows with how far it is from us."
         }
       ],
-      diagramHint: "Polar sketch of the galaxy with two stars: one near, one far.",
+      diagramHint: "Did you know? A parsec roughly equals to 31 thousand billions kilometers",
       notes: [
         "Dot size roughly encodes how many known planets a system has.",
         "We use galactic longitude for the angle around the map.",
@@ -106,18 +114,21 @@ export const scenes = [
         { from: "user", text: "Can we see individual planets instead of systems?" },
         {
           from: "guide",
-          text: "Here each dot is a planet. Left–right is size, bottom–top is mass. Tiny rocks bottom-left, giant gas worlds top-right."
+          text: "Yes. Here, each dot represents a planet, and they’re plotted according to their mass and radius: small, light rocky worlds appear in the lower-left area, while huge, massive gas giants appear in the upper-right area."
+        },
+        {
+          from: "user",
+          text: "So, where are the habitable planets?"
         },
         {
           from: "guide",
-          text: "If you are curious: the axes use Earth units. A value of 1 on each axis corresponds to Earth’s radius or mass."
+          text: "There's no habitability filters yet - just the full diversity of known planets."
         }
       ],
-      diagramHint: "Plane with labels: small/light vs giant planets, Earth marked in between.",
+      diagramHint: "Did you know? Some exoplanets are about the size of Jupiter but so light and “puffy” that their average density is similar to Styrofoam.",
       notes: [
-        "The x-axis is planet radius in Earth radii (R⊕).",
-        "The y-axis is planet mass in Earth masses (M⊕).",
-        "No habitability filters yet - just the full diversity of known planets."
+        "The x-axis shows the planet’s radius, measured in units of Earth’s radius (R⊕).",
+        "The y-axis shows the planet's mass, mesaured in units of Earth masses (M⊕)."
       ]
     }
   },
@@ -159,22 +170,25 @@ export const scenes = [
       chat: [
         {
           from: "user",
-          text: "How do we spot rocky worlds in all these points?"
+          text: "Planets made of gas? we need rocky planets to live on!"
         },
         {
           from: "guide",
-          text: "We focus on planets in a rocky size range, where they are more likely to be made of rock and metal instead of mostly gas."
+          text: "Correct. We need to identify planets made of solid materials. One way to do this is by focusing on the size range where planets are most likely to be composed of rock and/or metal."
+        },
+        {
+          from: "user",
+          text: "So the blue area is this range?"
         },
         {
           from: "guide",
-          text: "The blue band shows that size range in radius, and coloured dots are planets whose mass and radius fit this rocky profile."
+          text: "Exactly, the blue band shows size range, and coloured dots are planets whose radius fit this rocky profile."
         }
       ],
-      diagramHint: "Size line: Mars → Earth → Super-Earth → Neptune, rocky range highlighted.",
+      diagramHint: "Did you know? For small rocky planets, adding mass doesn’t always increase radius much: gravity compresses them, so they get heavier without getting much bigger.",
       notes: [
-        "Rocky planets are coloured; others stay greyed out.",
-        "Dot size also encodes radius.",
-        "The rocky size window here is roughly 0.5 to 1.6 times Earth’s radius."
+        "The rocky size window here is roughly 0.5 to 1.6 times Earth’s radius.",
+        "Dot size also encodes radius."
       ],
       legend: {
         sections: [
@@ -188,7 +202,7 @@ export const scenes = [
           {
             title: "Area",
             items: [
-              { type: "area", color: COLORS.rocky, label: "Rocky size zone (0.5–1.6 R⊕)" }
+              { type: "area", color: COLORS.rocky, label: "Rocky size zone" }
             ]
           }
         ]
@@ -249,21 +263,24 @@ export const scenes = [
     sidebarContent: {
       heading: "Step 4 · Estimating surface gravity",
       chat: [
-        { from: "user", text: "Earth-size ≠ Earth-gravity, right?" },
+        { 
+          from: "user", 
+          text: "So, these are habitable planets?" },
         {
           from: "guide",
-          text: "Right. For the same radius, more mass means stronger gravity. We use mass and radius to estimate how heavy you would feel."
+          text: "No, we still need to assess a few things. Gravity, for example, dictates how heavy you would feel on the planet."
         },
+         { 
+          from: "user", 
+          text: "How do we define gravity?" },
         {
           from: "guide",
-          text: "If you are curious: in Earth units we approximate surface gravity as g_rel ≈ mass_rel / radius_rel²."
+          text: "Earth’s gravity is defined as 1g. For humans to live comfortably, an exoplanet’s gravity should be roughly between 0.5g and 1.5g. Using mass and radius, we mark this range as the orange region."
         }
       ],
-      diagramHint: "Three circles with sparse, medium, dense hatch labelled low / ok / high g.",
+      diagramHint: "Did you know? On a low-gravity exoplanet, you could jump several meters and do slow-motion flips, but over time your bones would weaken and your muscles would shrink.",
       notes: [
-        "Coloured points are rocky planets whose estimated surface gravity is between about 0.5 and 1.5 times Earth’s gravity.",
-        "The diagonal band in the background shows where mass and radius combine to give that comfortable gravity.",
-        "Formula hint: g_rel ≈ mass_rel / radius_rel² when mass and radius are measured relative to Earth."
+        "The orange area is defined with this formula: g_rel ≈ mass_rel / radius_rel² when mass and radius are measured relative to Earth."
       ],
       legend: {
         sections: [
