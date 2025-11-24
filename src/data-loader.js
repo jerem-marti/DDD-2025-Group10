@@ -6,8 +6,8 @@
  */
 export async function loadData(fetchFn = fetch) {
   const [planetsRes, systemsRes] = await Promise.all([
-    fetchFn("/data/planets.json"),
-    fetchFn("/data/systems.json")
+    fetchFn("./data/planets.json"),
+    fetchFn("./data/systems.json")
   ]);
 
   if (!planetsRes.ok) {
