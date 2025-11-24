@@ -19,9 +19,6 @@ This project explores which known exoplanets could be viable homes for humans. U
 ### Protocol Diagram
 #### Indian Journey
 
-![Prototype screenshot](/docs/Diagram_indian.svg)
-![Prototype screenshot](/docs/Diagram_indian.svg)
-
 ```mermaid
 flowchart TB
     %% ROOT TOPIC
