@@ -256,6 +256,7 @@ body {
 /* Notes list */
 #sidebar-notes {
   margin: 0;
+  margin-top: auto;
   padding-left: 1.1rem;
   font-size: 0.8rem;
   color: var(--text-muted);
