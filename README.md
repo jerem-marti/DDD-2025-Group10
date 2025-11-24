@@ -251,8 +251,8 @@ flowchart TB
     a_compare -.-> viz_culture
     
     %% STYLES
-    classDef considered stroke-dasharray: 5 5, stroke-width:1px, fill:#e0e0e0
-    classDef explored stroke-dasharray: 5 5, stroke-width:2px, fill:#EEEEEE, stroke:#999999
+    classDef considered stroke-dasharray: 5 5, stroke-width:2px, fill:#3d3d3d, stroke:#888888, color:#e0e0e0
+    classDef explored stroke-dasharray: 5 5, stroke-width:2px, fill:#2d2d2d, stroke:#666666, color:#cccccc
     
     class rq3,a_culture,dataset_culture,a_compare,viz_culture considered
     class rq_hindu,a_image_search,tool_google_images,data_autonomous,data_first_10,tool_photoshop_auto,tool_photoshop_first,a_decompose_auto,a_decompose_first,decomposed_auto,decomposed_first,tool_ae_auto,tool_ae_first,viz_video_auto,viz_video_first explored
