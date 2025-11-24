@@ -17,11 +17,10 @@ This project explores which known exoplanets could be viable homes for humans. U
 ---
 
 ### Protocol Diagram
+#### Indian Journey
 
-```mermaid
-
-
-```
+![Prototype screenshot](/resources/Diagram_indian.svg)
+![Prototype screenshot](/resources/Diagram_indian.svg)
 
 ---
 
@@ -114,12 +113,12 @@ NASA Exoplanet Archive – Planetary Systems Composite Parameters (PSCompPars) t
 
 ### What does the visualisation show?
 
-At the current stage, the visualisation is designed as a grid of **small multiples**, where each panel shows a subset of potentially human-habitable exoplanets, filtered using our criteria.
+The visualization is designed to bring the user through a journey on identifying habitable hexoplanets starting from step 1 where known planets in our galaxy are presented all the way through step 7 where the most habitable planet are shown and are compared to Earth.
 
 Three key readings:
 
 * **Shortlist of “Goldilocks” worlds**
-  By combining radius, insolation, stellar temperature and surface gravity, we build “optimistic” and “conservative” sets of candidate planets. The small multiples make visible how rare these Earth-like conditions are among the thousands of known exoplanets.
+  By combining radius, insolation, stellar temperature and surface gravity, we build “optimistic” and “conservative” sets of candidate planets. Among all 6 thousand planets, only 12 conservative planets would be suitable for human life.
 
 * **Diversity across star types and distances**
   Panels can be grouped by host star class (for example M, K, G, F) and by distance from Earth. This reveals how our best candidates are distributed in terms of stellar environment and proximity, and highlights the trade-off between habitability and observability.
